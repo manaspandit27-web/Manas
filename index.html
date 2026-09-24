@@ -82,6 +82,7 @@ button:focus-visible { outline: 1px solid var(--lamp); outline-offset: 3px; }
 }
 #controls.on { opacity: 1; }
 #controls button:hover, #controls button:focus-visible { color: var(--ink); }
+#controls button.warn { color: var(--lamp); text-shadow: 0 0 10px rgba(242,178,92,0.6); }
 
 .panel {
   position: fixed; left: 0; right: 0;
@@ -2120,6 +2121,28 @@ function renderFrame(T, wall) {
 
 /* ------------------------------ sound ------------------------------ */
 // Everything you hear is synthesized live: no samples, no files.
+// iPhones silence Web Audio when the Ring/Silent switch is on. Asking for a media
+// "playback" session (and, on older iOS, keeping a silent <audio> element playing)
+// makes the film audible the way a video would be.
+let unlockEl = null;
+function silentWav() {
+  const n = 2000, b = new Uint8Array(44 + n), v = new DataView(b.buffer);
+  const str = (o, t) => { for (let i = 0; i < t.length; i++) b[o + i] = t.charCodeAt(i); };
+  str(0, 'RIFF'); v.setUint32(4, 36 + n, true); str(8, 'WAVEfmt '); v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, 8000, true); v.setUint32(28, 8000, true);
+  v.setUint16(32, 1, true); v.setUint16(34, 8, true); str(36, 'data'); v.setUint32(40, n, true);
+  b.fill(128, 44);
+  let bin = ''; for (let i = 0; i < b.length; i++) bin += String.fromCharCode(b[i]);
+  return 'data:audio/wav;base64,' + btoa(bin);
+}
+function unlockAudioSession(play) {
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* not supported */ }
+  try {
+    if (!unlockEl) { unlockEl = new Audio(silentWav()); unlockEl.loop = true; unlockEl.setAttribute('playsinline', ''); }
+    if (play) { const p = unlockEl.play(); if (p && p.catch) p.catch(() => {}); } else unlockEl.pause();
+  } catch (e) { /* media elements unavailable */ }
+}
+
 function makeSound() {
   let ac = null, out = null, wet = null, noiseBuf = null, muted = false, lastT = -1, simT = null;
   const beds = {};
@@ -2196,6 +2219,11 @@ function makeSound() {
     const conv = ac.createConvolver(); conv.buffer = ir;
     wet = gain(1, null); wet.connect(conv); conv.connect(gain(0.45, out));
 
+    // the terminal: a low power-on hum
+    { const b = bed('void', 0.2);
+      const lp = filt('lowpass', 240, 0.6, gain(0.022, b));
+      osc('sine', 55).connect(lp); osc('triangle', 110).connect(gain(0.006, b));
+      osc('sine', 0.5).connect(gain(0.008, lp.gain)); }
     // halls: mains hum, ballast buzz, room tone
     { const b = bed('halls', 0.12);
       const hum = gain(0.05, b), lp = filt('lowpass', 480, 0.7, hum); osc('sawtooth', 60).connect(lp);
@@ -2295,9 +2323,16 @@ function makeSound() {
   }
   return {
     renderOffline,
-    start() { init(); if (!ac) return; ac.resume && ac.resume(); out.gain.setTargetAtTime(muted ? 0 : 0.9, now(), 0.4); },
-    pause() { if (ac && ac.state === 'running') ac.suspend(); },
-    resume() { if (ac && ac.state === 'suspended') ac.resume(); },
+    start() {
+      unlockAudioSession(true);
+      init(); if (!ac) return;
+      if (ac.resume) ac.resume().catch(() => {});
+      out.gain.setTargetAtTime(muted ? 0 : 0.9, now(), 0.4);
+    },
+    pause() { unlockAudioSession(false); if (ac && ac.state === 'running') ac.suspend(); },
+    resume() { if (ac && ac.state !== 'running' && ac.state !== 'closed') { unlockAudioSession(true); ac.resume().catch(() => {}); } },
+    get running() { return !!ac && ac.state === 'running'; },
+    get started() { return !!ac; },
     reset(T) { lastT = T; },
     toggle() { muted = !muted; if (ac) out.gain.setTargetAtTime(muted ? 0 : 0.9, now(), 0.1); return !muted; },
     typed() { if (ac && ac.state === 'running' && !muted) tick(0.02); },
@@ -2369,7 +2404,7 @@ function loop(now) {
   }
   renderFrame(STATE.t, now / 1000);
   warmUp(now / 1000);
-  if (STATE.mode === 'play') { updateDOM(STATE.t); if (STATE.playing) SOUND.update(STATE.t, STATE.act, STATE.mix); }
+  if (STATE.mode === 'play') { updateDOM(STATE.t); if (STATE.playing) SOUND.update(STATE.t, STATE.act, STATE.mix); soundLabel(); }
   if (!DEV_STILL) requestAnimationFrame(loop);
 }
 
@@ -2384,7 +2419,7 @@ function warmUp(T) {
 
 function start(t0 = 0, withSound = true) {
   STATE.mode = 'play'; STATE.t = t0; STATE.playing = true; STATE.ended = false; STATE.bootCount = 0;
-  if (withSound) { SOUND.start(); SOUND.resume(); }
+  if (withSound) { SOUND.start(); STATE.soundSince = performance.now(); }
   SOUND.reset(t0);
   intro.classList.add('gone'); setTimeout(() => { intro.hidden = true; }, 900);
   outro.classList.add('gone'); outro.hidden = true;
@@ -2409,10 +2444,25 @@ $('b-play').addEventListener('click', () => {
   $('b-play').textContent = STATE.playing ? 'pause' : 'play';
 });
 $('b-sound').addEventListener('click', () => {
+  // when the browser is holding sound back, this tap is what lets it in
+  if (!SOUND.muted && SOUND.started && !SOUND.running) { SOUND.resume(); return; }
   SOUND.start();
-  const on = SOUND.toggle();
-  $('b-sound').textContent = on ? 'sound: on' : 'sound: off';
+  SOUND.toggle();
+  soundLabel();
 });
+// Any tap or key press during the film retries sound the browser held back.
+const kick = () => { if (STATE.mode === 'play' && STATE.playing && !SOUND.muted) SOUND.resume(); };
+addEventListener('pointerdown', kick, { passive: true });
+addEventListener('touchend', kick, { passive: true });
+addEventListener('keydown', kick);
+function soundLabel() {
+  const b = $('b-sound');
+  const blocked = STATE.mode === 'play' && STATE.playing && !SOUND.muted && SOUND.started && !SOUND.running &&
+    performance.now() - (STATE.soundSince || 0) > 1200;
+  const text = SOUND.muted ? 'sound: off' : blocked ? 'tap for sound' : 'sound: on';
+  if (b.textContent !== text) b.textContent = text;
+  b.classList.toggle('warn', blocked);
+}
 addEventListener('keydown', (e) => {
   if (e.target.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return;
   if (e.key === ' ') { e.preventDefault(); if (STATE.mode === 'intro') start(0); else $('b-play').click(); }
