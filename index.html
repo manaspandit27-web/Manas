@@ -2120,10 +2120,10 @@ function renderFrame(T, wall) {
 
 /* ------------------------------ sound ------------------------------ */
 // Everything you hear is synthesized live: no samples, no files.
-const SOUND = (() => {
-  let ac = null, out = null, wet = null, noiseBuf = null, muted = false, lastT = -1;
+function makeSound() {
+  let ac = null, out = null, wet = null, noiseBuf = null, muted = false, lastT = -1, simT = null;
   const beds = {};
-  const now = () => ac.currentTime;
+  const now = () => (simT !== null ? simT : ac.currentTime);
   const osc = (type, f) => { const o = ac.createOscillator(); o.type = type; o.frequency.value = f; o.start(); return o; };
   const gain = (v, dest) => { const g = ac.createGain(); g.gain.value = v; if (dest) g.connect(dest); return g; };
   const filt = (type, f, q, dest) => { const b = ac.createBiquadFilter(); b.type = type; b.frequency.value = f; if (q) b.Q.value = q; if (dest) b.connect(dest); return b; };
@@ -2173,18 +2173,23 @@ const SOUND = (() => {
     o.connect(g); g.connect(out); g.connect(wet); env(g, t, 0.005, vol, 1.2); o.start(t); o.stop(t + 1.4);
   }
 
-  function init() {
+  function init(ctx) {
     if (ac) return;
     const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return;
-    ac = new AC();
+    if (!ctx && !AC) return;
+    ac = ctx || new AC();
     const len = ac.sampleRate * 2;
     noiseBuf = ac.createBuffer(1, len, ac.sampleRate);
     const nd = noiseBuf.getChannelData(0);
     for (let i = 0; i < len; i++) nd[i] = Math.random() * 2 - 1;
+    // glue compressor -> makeup gain -> brickwall limiter
+    const lim = ac.createDynamicsCompressor();
+    lim.threshold.value = -2; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = 0.002; lim.release.value = 0.12;
+    lim.connect(ac.destination);
+    const makeup = gain(2.4, lim);
     const comp = ac.createDynamicsCompressor();
-    comp.threshold.value = -20; comp.knee.value = 14; comp.ratio.value = 3; comp.attack.value = 0.01; comp.release.value = 0.35;
-    comp.connect(ac.destination);
+    comp.threshold.value = -24; comp.knee.value = 12; comp.ratio.value = 3; comp.attack.value = 0.01; comp.release.value = 0.35;
+    comp.connect(makeup);
     out = gain(0, comp);
     const ir = ac.createBuffer(2, ac.sampleRate * 3.6, ac.sampleRate);
     for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2.8); }
@@ -2252,7 +2257,7 @@ const SOUND = (() => {
   const PENTA = [440, 523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.5];
 
   function update(T, act, mix) {
-    if (!ac || ac.state !== 'running') { lastT = T; return; }
+    if (!ac || (simT === null && ac.state !== 'running')) { lastT = T; return; }
     // bed levels follow whichever rooms are on screen
     const w = {};
     act.forEach((sc, i) => { w[sc.id] = act.length > 1 ? (i ? mix : 1 - mix) : 1; });
@@ -2271,7 +2276,25 @@ const SOUND = (() => {
     if ((w.library || 0) > 0.5 && Math.random() < dt * 0.6) whoosh(3000, 1800, 0.18, 0.012, 1);
     lastT = T;
   }
+  // Render the whole soundtrack faster than real time (used to make the video).
+  async function renderOffline(dur, sr = 48000) {
+    const oac = new OfflineAudioContext(2, Math.ceil(sr * dur), sr);
+    simT = 0; init(oac); out.gain.value = 0.9; lastT = 0;
+    const ticks = [];
+    for (const L of LINES) for (let k = 2; k < L.s.length; k += 2) ticks.push(L.t + k / CPS);
+    BOOT.forEach(([t, prompt, cmd]) => { if (prompt) for (let k = 0; k < cmd.length; k++) ticks.push(t + 0.12 + k / 26); });
+    ticks.sort((a, b) => a - b);
+    for (let f = 0; f <= dur * 60; f++) {
+      const T = f / 60; simT = T;
+      const act = activeAt(T);
+      const mix = act.length > 1 ? clamp((T - act[1].t0) / (act[0].t1 - act[1].t0), 0, 1) : 0;
+      update(T, act, mix);
+      while (ticks.length && ticks[0] <= T) { ticks.shift(); tick(0.02); }
+    }
+    return oac.startRendering();
+  }
   return {
+    renderOffline,
     start() { init(); if (!ac) return; ac.resume && ac.resume(); out.gain.setTargetAtTime(muted ? 0 : 0.9, now(), 0.4); },
     pause() { if (ac && ac.state === 'running') ac.suspend(); },
     resume() { if (ac && ac.state === 'suspended') ac.resume(); },
@@ -2281,7 +2304,8 @@ const SOUND = (() => {
     update,
     get muted() { return muted; },
   };
-})();
+}
+const SOUND = makeSound();
 
 /* ------------------------------ captions & hud ------------------------------ */
 
@@ -2396,6 +2420,22 @@ addEventListener('keydown', (e) => {
   if (e.key === 'm' || e.key === 'M') $('b-sound').click();
 });
 
+window.__soundtrack = async (dur) => {
+  const buf = await makeSound().renderOffline(dur);
+  const n = buf.length, ch = buf.numberOfChannels, sr = buf.sampleRate;
+  const out = new DataView(new ArrayBuffer(44 + n * ch * 2));
+  const str = (o, t) => { for (let i = 0; i < t.length; i++) out.setUint8(o + i, t.charCodeAt(i)); };
+  str(0, 'RIFF'); out.setUint32(4, 36 + n * ch * 2, true); str(8, 'WAVEfmt '); out.setUint32(16, 16, true);
+  out.setUint16(20, 1, true); out.setUint16(22, ch, true); out.setUint32(24, sr, true); out.setUint32(28, sr * ch * 2, true);
+  out.setUint16(32, ch * 2, true); out.setUint16(34, 16, true); str(36, 'data'); out.setUint32(40, n * ch * 2, true);
+  const data = [...Array(ch)].map((_, c) => buf.getChannelData(c));
+  let o = 44;
+  for (let i = 0; i < n; i++) for (let c = 0; c < ch; c++) { out.setInt16(o, Math.max(-1, Math.min(1, data[c][i])) * 32767, true); o += 2; }
+  const bytes = new Uint8Array(out.buffer);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+};
 window.__renderAt = (t) => { if (STATE.mode !== 'play') { start(t, false); intro.hidden = true; } STATE.t = t; STATE.playing = false; STATE.fade = 1 - smooth(END - 1.2, END, t); renderFrame(t, t); updateDOM(t); };
 
 const boot = () => {
@@ -2407,6 +2447,8 @@ const boot = () => {
 const fontReady = document.fonts ? Promise.race([document.fonts.load(`400 16px ${FONT}`).then(() => document.fonts.load(`700 16px ${FONT}`)), new Promise(r => setTimeout(r, 2500))]) : Promise.resolve();
 fontReady.then(boot, boot);
 addEventListener('resize', () => { R.W = 0; });
+// if the web font arrives after the fallback timeout, redraw the glyph atlas with it
+if (document.fonts) document.fonts.addEventListener('loadingdone', () => { R.W = 0; });
 })();
 </script>
 </body>

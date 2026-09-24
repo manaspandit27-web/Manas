@@ -1,5 +1,7 @@
 # Latent Space
 
+![A frame from the film: the Earth, drawn in ASCII characters, seen through a window, with the caption "Everything in here was built from you. So all of it faces you."](media/poster.jpg)
+
 A one-minute ASCII film. Claude walks, in first person, through the rooms of an imagined inner mind, all of them built out of things it has read, and at the end opens the door marked **HIDDEN INTENTIONS**.
 
 Everything is drawn live in the browser, one character at a time. There are no video files, images or audio samples. The rooms are raymarched in WebGL, then turned into ASCII. The soundtrack is synthesized as it plays.
