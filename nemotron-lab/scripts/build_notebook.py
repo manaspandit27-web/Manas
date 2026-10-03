@@ -1,4 +1,5 @@
-"""Builds notebooks/finetune_lab.ipynb and notebooks/instructor_dry_run.ipynb from the cells below (edit here, then re-run).
+"""Builds notebooks/finetune_lab.ipynb, notebooks/instructor_dry_run.ipynb and notebooks/projector_demo.ipynb from the
+cells below (edit here, then re-run).
 
 Usage:  python scripts/build_notebook.py
 """
@@ -304,6 +305,53 @@ print("\nALL DONE")'''),
 ]
 
 
+DEMO_CELLS = [
+    ("md", """# Projector demo: chat with Nemotron before and after fine-tuning
+
+Put this on the projector. It is a plain chat page on top of the model:
+
+1. **Ask.** Type a message and Nemotron answers, as it was downloaded.
+2. **Fine-tune.** Press *Fine-tune*, add the labelled files students sent back, and start. The progress shows on screen.
+3. **Switch and ask again.** Switch the chat to the fine-tuned model and ask the same questions again.
+
+**Getting labels from the class.** In the *Fine-tune* box, download the examples file and share it (for example as a Google Sheet). Students fill in the label columns using the company's rules and send the file back as CSV. Several files are fine; when two students label the same message, the more common label is used.
+
+Fine-tuning on 100 examples takes about 9 to 13 minutes on a free T4.
+
+*To rehearse without a GPU, on a laptop:* `python -m lab.demo --simulate` (answers are simulated)."""),
+
+    ("md", """## 1. Setup
+
+Runtime → Change runtime type → **T4 GPU**, then run:"""),
+    ("code", f"""# Downloads the lab materials and installs two libraries (~1 minute)
+REPO = "{REPO}"
+BRANCH = "{BRANCH}"
+import os, sys
+if not os.path.exists("/content/lab-repo"):
+    !git clone -q --depth 1 -b {{BRANCH}} {{REPO}} /content/lab-repo
+os.chdir("/content/lab-repo/nemotron-lab")
+!pip install -q bitsandbytes peft
+sys.path.insert(0, ".")
+from lab import core, demo
+print("Ready.")"""),
+
+    ("code", """# Loads NVIDIA Nemotron onto the GPU (~3 minutes)
+model, tok = core.load_model()"""),
+
+    ("md", """## 2. Start the chat
+
+The next cell prints a link. Click it to open the chat in a new tab, and put that tab on the projector. The link only works in your own browser."""),
+
+    ("code", """engine = demo.launch(model, tok)"""),
+
+    ("md", """## 3. Keep the session alive
+
+Leave this cell running during class and keep this browser tab open, so Colab does not treat the session as idle."""),
+
+    ("code", """demo.keep_running(engine)"""),
+]
+
+
 def write(cells, out):
     nb_cells = []
     for kind, src in cells:
@@ -325,6 +373,7 @@ def write(cells, out):
 def main():
     write(CELLS, OUT)
     write(DRY_RUN_CELLS, OUT.parent / "instructor_dry_run.ipynb")
+    write(DEMO_CELLS, OUT.parent / "projector_demo.ipynb")
 
 
 if __name__ == "__main__":

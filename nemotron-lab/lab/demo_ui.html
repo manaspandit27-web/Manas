@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nemotron chat</title>
+<style>
+  :root {
+    --page: #ffffff; --soft: #f4f4f2; --ink: #0b0b0b; --ink2: #52514e; --muted: #898781; --hair: #e1e0d9;
+    --border: rgba(11,11,11,.14); --accent: #2a78d6; --track: #cde2fb; --bad-wash: #fbeaea; --bad-ink: #a82a2a;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--page); color: var(--ink); font: 18px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; display: flex; flex-direction: column; }
+  button, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:disabled { cursor: default; opacity: .45; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  .rehearsal { background: var(--soft); color: var(--ink2); font-size: 14px; text-align: center; padding: 4px 16px; }
+  header { display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-bottom: 1px solid var(--hair); }
+  header h1 { font-size: 18px; margin: 0; }
+  header select { border: 0; background: transparent; color: var(--ink2); padding: 4px; max-width: 46vw; }
+  .grow { flex: 1; }
+  .switch { display: inline-flex; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; }
+  .switch button { border: 0; background: var(--page); padding: 6px 14px; font-size: 16px; }
+  .switch button + button { border-left: 1px solid var(--border); }
+  .switch button[aria-pressed="true"] { background: var(--ink); color: var(--page); }
+  .btn { border: 1px solid var(--border); background: var(--page); border-radius: 9px; padding: 6px 14px; font-size: 16px; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .link { border: 0; background: none; padding: 0; color: var(--accent); font-size: 15px; text-decoration: underline; }
+
+  main { flex: 1; overflow-y: auto; }
+  .col { max-width: 780px; margin: 0 auto; padding: 24px 20px; }
+  .try { color: var(--muted); font-size: 15px; margin: 26px 0 8px; }
+  .starters { display: grid; gap: 10px; text-align: left; }
+  .starters button { border: 1px solid var(--border); background: var(--page); border-radius: 12px; padding: 12px 16px; text-align: left; }
+  .starters button:hover { background: var(--soft); }
+  .msg { margin: 0 0 18px; }
+  .you { display: flex; justify-content: flex-end; }
+  .you div { max-width: 85%; background: var(--soft); border-radius: 18px; padding: 10px 16px; overflow-wrap: anywhere; white-space: pre-wrap; }
+  .who { font-size: 14px; color: var(--muted); margin: 0 0 2px; }
+  .reply { overflow-wrap: anywhere; white-space: pre-wrap; }
+  .reply dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 14px; margin: 0; white-space: normal; }
+  .reply dt { color: var(--ink2); }
+  .reply dd { margin: 0; font-weight: 600; }
+  .typing::after { content: "▍"; color: var(--muted); animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .typing::after { animation: none; } }
+  .note { text-align: center; color: var(--muted); font-size: 15px; margin: 0 0 18px; }
+
+  footer { border-top: 1px solid var(--hair); }
+  footer .col { padding: 10px 20px 16px; }
+  .error { background: var(--bad-wash); color: var(--bad-ink); border-radius: 8px; padding: 8px 12px; margin-bottom: 8px; font-size: 16px; }
+  .again { margin-bottom: 8px; }
+  form.ask { display: flex; gap: 10px; align-items: flex-end; }
+  textarea { flex: 1; resize: none; min-height: 50px; max-height: 160px; padding: 11px 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--page); }
+  form.ask .btn { height: 50px; padding: 0 20px; font-size: 18px; }
+
+  dialog { border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; width: min(520px, 92vw); color: var(--ink); }
+  dialog::backdrop { background: rgba(0,0,0,.35); }
+  dialog h2 { font-size: 20px; margin: 0 0 12px; }
+  dialog p { margin: 0 0 10px; }
+  dialog .small { font-size: 15px; color: var(--ink2); }
+  dialog .end { display: flex; gap: 10px; justify-content: flex-end; align-items: center; margin-top: 16px; }
+  dialog .end .link { margin-right: auto; }
+  .bar { height: 10px; border-radius: 5px; background: var(--track); overflow: hidden; margin: 6px 0; }
+  .bar i { display: block; height: 100%; background: var(--accent); border-radius: 0 4px 4px 0; transition: width .3s; }
+  .chart { position: relative; margin-top: 10px; }
+  .chart svg { width: 100%; height: auto; display: block; }
+  .tip { position: absolute; top: 0; display: none; pointer-events: none; transform: translateX(-50%); background: var(--ink); color: #fff; font-size: 13px; padding: 2px 8px; border-radius: 6px; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="rehearsal" id="rehearsal" hidden>Rehearsal: no model is loaded, the answers are simulated.</div>
+<header>
+  <h1>Nemotron</h1>
+  <select id="company" aria-label="Company"></select>
+  <span class="grow"></span>
+  <span class="switch" role="group" aria-label="Model that answers">
+    <button id="use-base" aria-pressed="true">Original</button><button id="use-tuned" aria-pressed="false" disabled>Fine-tuned</button>
+  </span>
+  <button class="btn" id="tune">Fine-tune</button>
+</header>
+<main id="main"><div class="col" id="thread"></div></main>
+<footer><div class="col">
+  <div class="error" id="error" role="alert" hidden></div>
+  <div class="again" id="again-row" hidden><button class="link" id="again">Ask the same questions again</button></div>
+  <form class="ask" id="ask">
+    <textarea id="text" rows="1" placeholder="Message Nemotron" aria-label="Message"></textarea>
+    <button class="btn primary" id="send">Send</button>
+  </form>
+</div></footer>
+
+<dialog id="dialog"><div id="dialog-body"></div></dialog>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let S = null, lastVersion = -1, timer = null, dialogSig = "", setup = false;
+
+async function api(name, body) {
+  const r = await fetch("api/" + name, {method: body ? "POST" : "GET", headers: {"Content-Type": "application/json"}, body: body ? JSON.stringify(body) : undefined});
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || "Request failed.");
+  return data;
+}
+async function act(name, body) {
+  try { showError(""); apply(await api(name, body || {})); }
+  catch (e) { showError(e.message); }
+  schedule(200);
+}
+function showError(msg) { const el = $("#error"); el.hidden = !msg; el.textContent = msg; }
+function schedule(ms) { clearTimeout(timer); timer = setTimeout(poll, ms); }
+async function poll() {
+  try { apply(await api("state")); } catch (e) { /* the notebook may be restarting; keep trying */ }
+  schedule(S && S.busy ? 400 : 2500);
+}
+
+const modelName = (mode) => mode === "tuned" ? "Fine-tuned model" : "Original model";
+
+function turnHtml(t) {
+  let reply;
+  if (t.status === "waiting") reply = `<div class="reply typing"></div>`;
+  else if (t.status === "running") reply = `<div class="reply typing">${esc(t.reply)}</div>`;
+  else if (t.status === "failed") reply = `<div class="reply">(stopped)</div>`;
+  else if (t.fields) reply = `<div class="reply"><dl>${t.fields.map((f) => `<dt>${esc(f.name)}</dt><dd>${esc(f.value || "—")}</dd>`).join("")}</dl></div>`;
+  else reply = `<div class="reply">${esc(t.reply)}</div>`;
+  return `<div class="msg you"><div>${esc(t.text)}</div></div><div class="msg"><p class="who">${modelName(t.mode)}</p>${reply}</div>`;
+}
+
+function renderThread() {
+  const box = $("#thread"), main = $("#main");
+  const nearBottom = main.scrollHeight - main.scrollTop - main.clientHeight < 160;
+  const fresh = !S.thread.some((x) => x.kind === "turn");
+  const slot = (id, html, first) => {
+    let el = document.getElementById(id);
+    if (!el) { el = document.createElement("div"); el.id = id; first ? box.prepend(el) : box.appendChild(el); }
+    if (el._html !== html) { el.innerHTML = html; el._html = html; }
+    return el;
+  };
+  slot("opening", `<div class="msg you"><div>${esc(S.scenario.opening)}</div></div>`, true);
+  const seen = new Set(["opening", "starters"]);
+  for (const item of S.thread) {
+    const id = "it-" + item.id; seen.add(id);
+    const html = item.kind === "turn" ? turnHtml(item)
+      : item.kind === "hello" ? `<div class="msg"><p class="who">${modelName("base")}</p><div class="reply ${item.status === "running" ? "typing" : ""}">${esc(item.reply)}</div></div>`
+      : `<p class="note">${esc(item.text)}</p>`;
+    let el = document.getElementById(id);
+    if (!el) { el = document.createElement("div"); el.id = id; box.appendChild(el); }
+    if (el._html !== html) { el.innerHTML = html; el._html = html; }
+  }
+  const starters = slot("starters", !fresh || S.busy ? "" : `<p class="try">Try one of these, or type your own:</p><div class="starters">${S.scenario.starters.map((s, i) => `<button data-i="${i}">${esc(s)}</button>`).join("")}</div>`);
+  box.appendChild(starters);
+  starters.querySelectorAll("button").forEach((b) => { b.onclick = () => act("ask", {text: S.scenario.starters[+b.dataset.i]}); });
+  [...box.children].forEach((el) => { if (!seen.has(el.id)) el.remove(); });
+  if (nearBottom && !fresh) main.scrollTop = main.scrollHeight;  // a fresh chat starts at the top
+}
+
+function lossChart(losses, total) {
+  if (losses.length < 2) return "";
+  const W = 460, H = 150, L = 34, R = 46, T = 8, B = 22;
+  const max = Math.max(...losses) * 1.05, x = (i) => L + (W - L - R) * (i / Math.max(total - 1, 1)), y = (v) => T + (H - T - B) * (1 - v / max);
+  const pts = losses.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" "), last = losses.length - 1;
+  const ticks = [0, max / 2, max].map((v) => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--hair)"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)">${v.toFixed(1)}</text>`).join("");
+  return `<div class="chart" id="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Training loss, now ${losses[last].toFixed(2)}">${ticks}
+    <polygon points="${L},${y(0)} ${pts} ${x(last).toFixed(1)},${y(0)}" fill="var(--accent)" opacity=".1"/>
+    <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${x(last)}" cy="${y(losses[last])}" r="4" fill="var(--accent)" stroke="#fff" stroke-width="2"/>
+    <text x="${x(last) + 8}" y="${y(losses[last]) + 4}" font-size="12" fill="var(--ink)">${losses[last].toFixed(2)}</text>
+    <line id="cross" y1="${T}" y2="${H - B}" stroke="var(--muted)" visibility="hidden"/>
+    <text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle" font-size="11" fill="var(--muted)">training step</text></svg><span class="tip" id="tip"></span></div>
+    <p class="small">Training loss: lower means its answers are closer to the labels.</p>`;
+}
+function wireChart(losses, total) {
+  const chart = $("#chart"); if (!chart) return;
+  const svg = chart.querySelector("svg"), tip = $("#tip"), cross = $("#cross"), W = 460, L = 34, R = 46;
+  svg.onmousemove = (ev) => {
+    const box = svg.getBoundingClientRect(), px = (ev.clientX - box.left) / box.width * W;
+    const i = Math.max(0, Math.min(losses.length - 1, Math.round((px - L) / (W - L - R) * Math.max(total - 1, 1))));
+    const cx = L + (W - L - R) * (i / Math.max(total - 1, 1));
+    cross.setAttribute("x1", cx); cross.setAttribute("x2", cx); cross.setAttribute("visibility", "visible");
+    tip.style.display = "block"; tip.style.left = (cx / W * 100) + "%"; tip.textContent = `step ${i + 1}: ${losses[i].toFixed(3)}`;
+  };
+  svg.onmouseleave = () => { tip.style.display = "none"; cross.setAttribute("visibility", "hidden"); };
+}
+
+function renderDialog() {
+  const d = $("#dialog"); if (!d.open) return;
+  const t = S.training, ex = S.examples;
+  if (t.status === "running") setup = false;
+  const sig = JSON.stringify([t, ex, S.tuned, S.serving, S.busy, setup]);
+  if (sig === dialogSig) return;
+  dialogSig = sig;
+  let html;
+  if (t.status === "running") {
+    const pct = t.total ? Math.round(100 * t.step / t.total) : 0;
+    const eta = t.eta === null ? "starting" : t.eta < 90 ? `about ${Math.max(1, t.eta)} seconds left` : `about ${Math.round(t.eta / 60)} minutes left`;
+    html = `<h2>Fine-tuning on ${t.n} examples</h2><div class="bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+      <p class="small">Step ${t.step} of ${t.total}, ${eta}</p>${lossChart(t.losses, t.total)}
+      <div class="end"><button class="btn" id="stop">Stop</button><button class="btn" id="close">Hide</button></div>`;
+  } else if (t.status === "done" && S.tuned && !setup) {
+    html = `<h2>Fine-tuned</h2><p>Trained on ${S.tuned.n} labelled examples in ${S.tuned.minutes} minutes.</p>${lossChart(t.losses, t.total)}
+      <div class="end"><button class="link" id="redo">Fine-tune again</button><button class="btn" id="close">Close</button>
+      ${S.serving === "tuned" ? "" : `<button class="btn primary" id="use">Use the fine-tuned model</button>`}</div>`;
+  } else {
+    const ready = ex.count >= ex.min;
+    const mins = Math.max(1, Math.round(S.t4_minutes_per_100 * ex.count * 2 / 100));
+    const got = ex.files || ex.problems.length
+      ? `<p><b>${ex.count} labelled example${ex.count === 1 ? "" : "s"}</b> from ${ex.files} file${ex.files === 1 ? "" : "s"}${ex.skipped ? `, ${ex.skipped} row${ex.skipped === 1 ? "" : "s"} skipped (a label was missing or not one of the allowed values)` : ""}.</p>${ex.problems.map((p) => `<p class="small">${esc(p)}</p>`).join("")}`
+      : "";
+    html = `<h2>Fine-tune on the class's labels</h2>
+      <p>1. <a href="examples.csv?n=100" download>Download 100 examples to label</a> and share them with the class.</p>
+      <p>2. Add the labelled files they send back.</p>
+      <p><input type="file" id="files" multiple accept=".csv,.tsv,.txt,text/csv"></p>${got}
+      ${t.status === "stopped" ? `<p class="small">Fine-tuning was stopped. The original model is unchanged.</p>` : ""}
+      <div class="end"><button class="link" id="lab">Use the lab's own labelled examples instead</button><button class="btn" id="close">Cancel</button>
+      <button class="btn primary" id="start" ${ready && !S.busy ? "" : "disabled"}>Start${ready ? ` (about ${mins} min)` : ""}</button></div>`;
+  }
+  $("#dialog-body").innerHTML = html;
+  const on = (sel, fn) => { const el = $(sel); if (el) el.onclick = fn; };
+  on("#close", () => d.close());
+  on("#stop", () => act("cancel"));
+  on("#use", () => { act("serve", {mode: "tuned"}); d.close(); });
+  on("#redo", () => { setup = true; renderDialog(); });
+  on("#start", () => act("finetune", {source: "class"}));
+  on("#lab", () => act("finetune", {source: "lab", n: 100}));
+  const files = $("#files");
+  if (files) files.onchange = async () => {
+    const list = await Promise.all([...files.files].map(async (f) => ({name: f.name, text: await f.text()})));
+    if (list.length) act("examples", {files: list});
+  };
+  wireChart(t.losses || [], t.total || 1);
+}
+
+function apply(state) {
+  S = state;
+  if (S.version !== lastVersion) {
+    lastVersion = S.version;
+    $("#rehearsal").hidden = !S.simulated;
+    const sel = $("#company");
+    if (sel.options.length !== S.scenarios.length) sel.innerHTML = S.scenarios.map((s) => `<option value="${esc(s.scenario)}">${esc(s.title.split(" - ")[0])}</option>`).join("");
+    sel.value = S.scenario.key; sel.disabled = !!S.busy;
+    $("#use-base").setAttribute("aria-pressed", S.serving === "base"); $("#use-base").disabled = !!S.busy;
+    $("#use-tuned").setAttribute("aria-pressed", S.serving === "tuned"); $("#use-tuned").disabled = !!S.busy || !S.tuned;
+    $("#use-tuned").title = S.tuned ? "" : "Not fine-tuned yet";
+    const t = S.training;
+    $("#tune").textContent = t.status === "running" ? `Fine-tuning ${t.total ? Math.round(100 * t.step / t.total) : 0}%` : "Fine-tune";
+    $("#send").disabled = !!S.busy;
+    const turns = S.thread.filter((x) => x.kind === "turn"), done = new Set(turns.filter((x) => x.mode === S.serving).map((x) => x.text));
+    $("#again-row").hidden = !!S.busy || !turns.some((x) => !done.has(x.text));
+    if (S.error) showError(S.error);
+    renderThread();
+  }
+  renderDialog();
+}
+
+$("#ask").onsubmit = (ev) => { ev.preventDefault(); const t = $("#text"), text = t.value.trim(); if (!text || (S && S.busy)) return; t.value = ""; t.style.height = ""; act("ask", {text}); };
+$("#text").onkeydown = (ev) => { if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); $("#ask").requestSubmit(); } };
+$("#text").oninput = (ev) => { ev.target.style.height = ""; ev.target.style.height = Math.min(160, ev.target.scrollHeight) + "px"; };
+$("#again").onclick = () => act("again");
+$("#company").onchange = (ev) => act("scenario", {key: ev.target.value});
+$("#use-base").onclick = () => act("serve", {mode: "base"});
+$("#use-tuned").onclick = () => act("serve", {mode: "tuned"});
+$("#tune").onclick = () => { dialogSig = ""; $("#dialog").showModal(); renderDialog(); };
+poll();
+</script>
+</body>
+</html>

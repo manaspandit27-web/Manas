@@ -15,9 +15,11 @@ The session follows the idea in Bridgewater × Thinking Machines, *[Learning to 
 | [`PRE-READ.md`](PRE-READ.md) | Students, before class | 15-minute interactive note: prompting vs RAG vs fine-tuning, determinism, open vs closed weights, the Bridgewater case |
 | [`notebooks/finetune_lab.ipynb`](notebooks/finetune_lab.ipynb) | Students, in class | The Colab notebook. Students run it top to bottom and edit only the ✏️ cells |
 | [`notebooks/instructor_dry_run.ipynb`](notebooks/instructor_dry_run.ipynb) | Instructors, before class | Runs baselines and fine-tuning sweeps on all 5 scenarios (100 test cases each) and reports the fewest examples that give a clear improvement |
+| [`notebooks/projector_demo.ipynb`](notebooks/projector_demo.ipynb) | Instructors, in class | A plain chat page for the projector: ask the model, fine-tune it on examples the class labelled, ask again |
 | [`instructor/INSTRUCTOR-GUIDE.md`](instructor/INSTRUCTOR-GUIDE.md) | Instructors | 60-minute run of show, settings cards, setup checklist, debrief questions, troubleshooting |
 | [`instructor/dry-run-2026-10-03/`](instructor/dry-run-2026-10-03/README.md) | Instructors | Results of a full dry run on a free Colab T4: tables, raw CSVs, executed notebook |
 | `scenarios/<name>/` | Both | `case.md` (1-page case), `policy.md` (the expert rules), `train.csv` (600 expert-labeled), `train_noisy.csv` (same, 30% mislabeled), `test.csv` (100 held out) |
+| `lab/demo.py`, `lab/demo_ui.html` | Under the hood | The projector chat: a small web server and its page |
 | `lab/core.py` | Under the hood | Loading, prompting, LoRA training and scoring, kept out of the notebook so cells stay short |
 | `scripts/` | Maintainers | `generate_data.py` rebuilds the datasets; `build_notebook.py` rebuilds both notebooks |
 | `tests/` | Maintainers | Data checks and a CPU smoke test of the full train → evaluate loop on a tiny stand-in model |

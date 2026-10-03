@@ -46,6 +46,29 @@ team=team-3 | scenario=claims_triage | examples=100 | data=clean | epochs=2 | pr
 
 Use *Data → Split text to columns* on `|` to chart it live.
 
+## Projector demo: chat before and after fine-tuning (optional)
+
+[`notebooks/projector_demo.ipynb`](../notebooks/projector_demo.ipynb) opens a plain chat page for the projector, with the same model and companies as the lab.
+
+1. **Ask.** The chat opens with the lab's instruction as the first message, and the model's reply to it. Type a message (or pick one of the three starter messages). The original model answers.
+2. **Collect labels.** Press **Fine-tune**, download the examples file, and share it with the class, for example as a Google Sheet. Students fill in the label columns using the company's rules and send the file back as CSV.
+3. **Fine-tune.** Add the files they sent and press **Start**. A progress bar and the training loss show on screen. Allow about 9 to 13 minutes for 100 examples on a T4.
+4. **Switch and ask again.** Switch the top bar from *Original* to *Fine-tuned*, then press **Ask the same questions again**.
+
+**About the labelled files**
+
+- Each file needs the `input` column (or the `id` column from the examples file) and one column per answer field.
+- Several files can be added at once. When two students labelled the same message, the more common label is used.
+- A row is skipped if a label is missing or is not one of the allowed values. Capitals, spaces and hyphens are forgiven: "Baggage services" counts as `baggage_services`.
+- No files? *Use the lab's own labelled examples instead* fine-tunes on 100 of the lab's examples.
+
+**Things to know**
+
+- Rehearse on a laptop with no GPU: `python -m lab.demo --simulate` from `nemotron-lab/`. Answers are simulated and the page says so.
+- One Colab GPU does everything, so the chat cannot answer while the model is fine-tuning.
+- The fine-tuned model is kept only while the notebook session lasts.
+- As of 3 October 2026 the chat has been tested with simulated answers and with a tiny stand-in model, but not yet on the real model on a GPU. Do a full run before relying on it in class.
+
 ## Setup checklist (do this a few days before class)
 
 - [ ] **Make the notebook reachable.** The notebook's first cell runs `git clone` on this repository and branch (set in `scripts/build_notebook.py`). The repo must be **public** for students to clone it without logging in, or you can copy the `nemotron-lab/` folder into a public course repo and update `REPO`/`BRANCH`, then run `python scripts/build_notebook.py`.

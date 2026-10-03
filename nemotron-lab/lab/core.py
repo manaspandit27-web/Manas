@@ -317,11 +317,13 @@ def pick_training_rows(scn, n):
 
 
 def train(model, tok, scn, n_examples=100, data="clean", epochs=2, learning_rate=2e-4, batch_size=4,
-          lora_rank=16, max_len=768, seed=0):
+          lora_rank=16, max_len=768, seed=0, progress=None):
     """LoRA fine-tuning. Returns (model_with_adapter, list_of_losses).
 
     data: 'clean' (expert labels) or 'noisy' (30% of rows have one wrong label).
     Calling train() again starts over from the original model.
+    progress: optional callback(step, total_steps, loss, seconds_left), called after every step. If it raises,
+    training stops and the original model is left without an adapter.
     """
     import torch
     from peft import LoraConfig, PeftModel, get_peft_model
@@ -362,27 +364,35 @@ def train(model, tok, scn, n_examples=100, data="clean", epochs=2, learning_rate
     model.train()
     losses, step, t0 = [], 0, time.time()
     bar = _bar(total_steps, "Fine-tuning")
-    for _ in range(epochs):
-        rng.shuffle(encoded)
-        for b in range(0, len(encoded), batch_size):
-            batch = encoded[b:b + batch_size]
-            width = max(len(ids) for ids, _ in batch)
-            input_ids = torch.tensor([ids + [pad] * (width - len(ids)) for ids, _ in batch], device=device)
-            labels = torch.tensor([lab + [-100] * (width - len(lab)) for _, lab in batch], device=device)
-            mask = torch.tensor([[1] * len(ids) + [0] * (width - len(ids)) for ids, _ in batch], device=device)
-            with torch.autocast(device_type=device.type, dtype=amp_dtype, enabled=use_amp):
-                loss = model(input_ids=input_ids, attention_mask=mask, labels=labels).loss
-            scaler.scale(loss).backward()
-            scaler.unscale_(opt)
-            torch.nn.utils.clip_grad_norm_(params, 1.0)
-            scaler.step(opt)
-            scaler.update()
-            opt.zero_grad(set_to_none=True)
-            sched.step()
-            losses.append(loss.item())
-            step += 1
-            eta = (time.time() - t0) / step * (total_steps - step)
-            bar(step, extra=f"loss {loss.item():.3f} | ~{eta / 60:.1f} min left")
+    try:
+        for _ in range(epochs):
+            rng.shuffle(encoded)
+            for b in range(0, len(encoded), batch_size):
+                batch = encoded[b:b + batch_size]
+                width = max(len(ids) for ids, _ in batch)
+                input_ids = torch.tensor([ids + [pad] * (width - len(ids)) for ids, _ in batch], device=device)
+                labels = torch.tensor([lab + [-100] * (width - len(lab)) for _, lab in batch], device=device)
+                mask = torch.tensor([[1] * len(ids) + [0] * (width - len(ids)) for ids, _ in batch], device=device)
+                with torch.autocast(device_type=device.type, dtype=amp_dtype, enabled=use_amp):
+                    loss = model(input_ids=input_ids, attention_mask=mask, labels=labels).loss
+                scaler.scale(loss).backward()
+                scaler.unscale_(opt)
+                torch.nn.utils.clip_grad_norm_(params, 1.0)
+                scaler.step(opt)
+                scaler.update()
+                opt.zero_grad(set_to_none=True)
+                sched.step()
+                losses.append(loss.item())
+                step += 1
+                eta = (time.time() - t0) / step * (total_steps - step)
+                bar(step, extra=f"loss {loss.item():.3f} | ~{eta / 60:.1f} min left")
+                if progress:
+                    progress(step, total_steps, losses[-1], eta)
+    except BaseException:  # stopped part-way: take the half-trained adapter off again
+        base = model.unload()
+        base.eval()
+        base.config.use_cache = True
+        raise
     bar(total_steps, finished=True, extra=f"done in {(time.time() - t0) / 60:.1f} min")
     model.eval()
     model.config.use_cache = True
