@@ -189,10 +189,10 @@ It then tells you, per scenario, the **fewest training examples that give a clea
 
 | `MODE` | Fine-tuning runs per scenario | Rough time, 5 scenarios |
 |---|---|---|
-| `"quick"` | 100 clean, 100 noisy (cards B and D) | ~1 hour on a free T4 |
-| `"full"` | 25 / 50 / 100 / 200 / 300 clean, 100 / 300 noisy | ~3 hours on a T4, ~1 hour on an L4 or A100 (Colab Pro) |
+| `"quick"` | 100 clean, 100 noisy (cards B and D) | ~3 hours on a free T4 (measured, 3 Oct 2026) |
+| `"full"` | 25 / 50 / 100 / 200 / 300 clean, 100 / 300 noisy | Not measured. Roughly 10 hours on a T4 by extrapolation, so use an L4 or A100 (Colab Pro) |
 
-*Times are estimates. The report prints the measured speed.* Results are saved after every run, so if Colab disconnects, re-run the cells and it continues where it stopped."""),
+*The free tier cut the GPU off after about 5.5 hours in one session, so `"full"` will not finish on a free T4 in one go.* Results are saved after every run, so if Colab disconnects, re-run the cells and it continues where it stopped. The report prints the measured training speed."""),
 
     ("md", """## 1. Setup
 
@@ -251,6 +251,56 @@ display(table)"""),
     ("code", """# Download the raw results (one row per run, including per-field accuracy)
 from google.colab import files
 files.download(OUT)"""),
+
+    ("md", """## 4. Optional: more examples for invoice_intake, and fine-tuned + docs
+
+Run this after sections 1-3 if `invoice_intake` reports **"not reached"**. It fine-tunes that scenario on more examples (200 and 300), then on the card B and card D settings, and tests every fine-tuned model twice on the same 100 held-out cases:
+
+* **fine-tuned**: the normal prompt (no policy), as in section 2,
+* **fine-tuned+docs**: the same fine-tuned model with the policy pasted into the prompt.
+
+Allow about 2 hours on a T4. Results go to a separate file, `nemotron_ft_plus_docs_results.csv`, and the cell resumes if re-run. It needs `SAVE_TO_DRIVE = True`."""),
+
+    ("code", r'''# Extra experiment on invoice_intake: more training examples, and every fine-tuned model is tested twice:
+# with the normal prompt ("fine-tuned") and with the policy docs pasted into the prompt ("fine-tuned+docs").
+# Results are appended after every test, so re-running this cell resumes where it stopped.
+import csv, os, time
+OUT2 = "/content/drive/MyDrive/nemotron_ft_plus_docs_results.csv"
+# 200 and 300 clean examples first; then the original card B / card D settings (100 clean, 100 noisy).
+PLAN = [("invoice_intake", 200, "clean", 2), ("invoice_intake", 300, "clean", 2),
+        ("invoice_intake", 100, "clean", 2), ("invoice_intake", 100, "noisy", 2)]
+
+def _done():
+    if not os.path.exists(OUT2):
+        return set()
+    with open(OUT2, newline="", encoding="utf-8") as fh:
+        return {(r["scenario"], r["method"], r["examples"], r["data"], r["epochs"]) for r in csv.DictReader(fh)}
+
+def _save(row):
+    new = not os.path.exists(OUT2)
+    with open(OUT2, "a", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=core.SWEEP_COLUMNS)
+        if new:
+            w.writeheader()
+        w.writerow(row)
+
+for key, n, data, epochs in PLAN:
+    done = _done()
+    need = [m for m in ("fine-tuned", "fine-tuned+docs") if (key, m, str(n), data, str(epochs)) not in done]
+    if not need:
+        continue
+    scn = core.load_scenario(key)
+    print(f"\n=== {key}: fine-tune on {n} {data} examples x {epochs} epoch(s)")
+    t0 = time.time()
+    model, losses = core.train(model, tok, scn, n_examples=n, data=data, epochs=epochs)
+    minutes = round((time.time() - t0) / 60, 1)
+    loss = round(sum(losses[-5:]) / len(losses[-5:]), 4)
+    for m in need:
+        res = core.evaluate(model, tok, scn, "prompt+docs" if m == "fine-tuned+docs" else "fine-tuned", n=100)
+        _save(core._sweep_row(scn, res, m, n, data, epochs, minutes, loss))
+        s = res["summary"]
+        print(f"RESULT {key} | {m} | {n} {data} | {s['all fields correct %']}% ({s['95% range']})")
+print("\nALL DONE")'''),
 ]
 
 

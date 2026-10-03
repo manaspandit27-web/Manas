@@ -50,20 +50,28 @@ Use *Data → Split text to columns* on `|` to chart it live.
 
 - [ ] **Make the notebook reachable.** The notebook's first cell runs `git clone` on this repository and branch (set in `scripts/build_notebook.py`). The repo must be **public** for students to clone it without logging in, or you can copy the `nemotron-lab/` folder into a public course repo and update `REPO`/`BRANCH`, then run `python scripts/build_notebook.py`.
 - [ ] **Share the notebook link:** `https://colab.research.google.com/github/<owner>/<repo>/blob/<branch>/nemotron-lab/notebooks/finetune_lab.ipynb`. If the branch name contains a `/`, merge to `main` first and use `main` in the link.
-- [ ] **Run [`notebooks/instructor_dry_run.ipynb`](../notebooks/instructor_dry_run.ipynb) in Colab.** For all five scenarios it runs both baselines, fine-tunes at each settings card, and reports the **fewest training examples that give a clear improvement**, meaning the fine-tuned 95% range lies entirely above the baseline's. `MODE = "quick"` (cards B and D, ~1 hour on a free T4) tells you whether the default of 100 examples is enough. `MODE = "full"` (~3 hours on a T4, ~1 hour on an L4 or A100 with Colab Pro) gives the whole learning curve. Results save to Google Drive after every run, so a disconnect loses nothing. Copy the results into the table below.
+- [ ] **Run [`notebooks/instructor_dry_run.ipynb`](../notebooks/instructor_dry_run.ipynb) in Colab.** For all five scenarios it runs both baselines, fine-tunes at each settings card, and reports the **fewest training examples that give a clear improvement**, meaning the fine-tuned 95% range lies entirely above the baseline's. `MODE = "quick"` (cards B and D, about 3 hours 20 minutes on a free T4 when measured) tells you whether the default of 100 examples is enough. `MODE = "full"` gives the whole learning curve but was not measured; by extrapolation it needs roughly 10 hours on a T4, and the free tier cut the GPU off after about 5.5 hours, so use an L4 or A100 with Colab Pro. Results save to Google Drive after every run, so a disconnect loses nothing. Copy the results into the table below.
 - [ ] **Check the model license and access.** `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1` is published under NVIDIA's open model license. Confirm that it is still downloadable without a login and that classroom use is fine.
 - [ ] **Have a backup.** Free Colab GPUs are usually available but not guaranteed for 90 people at once. Have a **Colab Pro** account ready to project a full run, and tell students without a GPU to pair up with a teammate.
 - [ ] *(Optional)* Ask students to run Step 0 before class. Colab sessions time out after ~90 minutes idle, so only do this right before class.
 
-### Dry-run results (fill in from `instructor_dry_run.ipynb`)
+### Dry-run results (free Colab T4, quick mode, 2–3 October 2026)
+
+All fields correct on 100 held-out test cases. Full tables, per-field scores, the raw CSVs and the executed notebook are in [`dry-run-2026-10-03/`](dry-run-2026-10-03/README.md).
 
 | Scenario | Prompt | Prompt + docs | Fine-tuned (card B) | Fewest examples to clearly beat prompt | Train min / 100 passes | Notes |
 |---|---|---|---|---|---|---|
-| airline_complaints | | | | | | |
-| invoice_intake | | | | | | |
-| claims_triage | | | | | | |
-| expense_audit | | | | | | |
-| lead_qualification | | | | | | |
+| airline_complaints | 7% | 31% | 73% | 100 | 5.7 | Also clearly beats prompt + docs. Card D (noisy): 59% |
+| invoice_intake | 1% | 21% | 10% | 100 | 6.4 | **Does not beat prompt + docs at 100.** Needs 300 examples (57%). Card D: 6% |
+| claims_triage | 6% | 15% | 72% | 100 | 5.8 | Also clearly beats prompt + docs. Card D: 37% |
+| expense_audit | 23% | 22% | 75% | 100 | 4.4 | Also clearly beats prompt + docs. Card D: 59% |
+| lead_qualification | 3% | 12% | 54% | 100 | 4.7 | Also clearly beats prompt + docs. Card D: 41% |
+
+Quick mode only tests 100 examples, so "100" means 100 was enough, not that it is the minimum.
+
+**`invoice_intake` needs a different setting.** With 100 examples the model learns to extract the vendor, invoice number and amount, but not the GL code (42%) or the approval path (34%). More examples fix it: 38% all-correct at 200 and 57% at 300, which clearly beats prompt + docs. At 300 examples training takes about 38 minutes on a T4, which is too long for the 60-minute session, so don't assign this scenario at the default settings.
+
+**Giving a fine-tuned model the policy docs as well did not help.** On `invoice_intake`, the model fine-tuned on 200 examples scored 38% with the normal prompt and 37% with the policy pasted in. At 300 examples the policy made it worse: 57% without, 38% with. The model was trained on prompts without the policy, so a prompt with the policy is unfamiliar to it. This is a useful debrief point: fine-tuning and "prompt + docs" do not simply add up.
 
 **If a scenario reports "not reached" for 100 examples:** raise `N_EXAMPLES` in the notebook's Step 4 default (and on cards B and D) to the number the dry run reports, or drop that scenario. Training time grows roughly in proportion to `N_EXAMPLES × EPOCHS`.
 

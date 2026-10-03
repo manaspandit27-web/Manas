@@ -1,0 +1,6 @@
+scenario,method,examples,data,epochs,all_correct,range_low,range_high,valid_json,prompt_tokens,train_minutes,eval_seconds,final_loss,per_field
+invoice_intake,fine-tuned,200,clean,2,38,29,48,100,224,25.0,217,0.0271,"{""vendor"": 100, ""invoice_number"": 100, ""amount_usd"": 99, ""gl_code"": 98, ""approval"": 40}"
+invoice_intake,fine-tuned+docs,200,clean,2,37,28,47,100,557,25.0,387,0.0271,"{""vendor"": 98, ""invoice_number"": 95, ""amount_usd"": 100, ""gl_code"": 94, ""approval"": 40}"
+invoice_intake,fine-tuned,300,clean,2,57,47,66,100,224,37.9,213,0.0169,"{""vendor"": 100, ""invoice_number"": 100, ""amount_usd"": 99, ""gl_code"": 99, ""approval"": 58}"
+invoice_intake,fine-tuned+docs,300,clean,2,38,29,48,100,557,37.9,386,0.0169,"{""vendor"": 100, ""invoice_number"": 100, ""amount_usd"": 100, ""gl_code"": 96, ""approval"": 39}"
+invoice_intake,fine-tuned,100,clean,2,10,6,17,100,224,12.8,216,0.0524,"{""vendor"": 97, ""invoice_number"": 100, ""amount_usd"": 98, ""gl_code"": 42, ""approval"": 34}"
