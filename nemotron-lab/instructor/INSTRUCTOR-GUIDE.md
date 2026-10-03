@@ -10,6 +10,8 @@
 
 ## Run of show
 
+For a step-by-step view of what the instructor does and what students do, see [`ACTIVITY-WALKTHROUGH.md`](ACTIVITY-WALKTHROUGH.md).
+
 The timings are a suggestion and have not been rehearsed with a class.
 
 | Time | Block | What happens |
