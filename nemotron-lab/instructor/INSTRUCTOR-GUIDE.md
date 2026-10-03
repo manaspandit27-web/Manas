@@ -1,12 +1,112 @@
 # Instructor guide: Data and Fine-Tuning Models (60 minutes)
 
-**Session goal:** students leave able to explain the three ways to bring company data to a model (prompting, RAG, fine-tuning), when each one fits, and why open-weight models plus expert-labeled data can beat frontier models on narrow tasks. They do this by fine-tuning NVIDIA Nemotron themselves.
+**Session goal:** students leave able to explain the three ways to bring company data to a model (prompting, RAG, fine-tuning), when each one fits, and why open-weight models plus expert-labeled data can beat frontier models on narrow tasks.
+
+**How it works:** the instructor runs everything, on the projector. Students don't run any code. They label examples, and the model is fine-tuned on their labels in front of them.
 
 **Pre-work for students:** [`PRE-READ.md`](../PRE-READ.md) (~15 min) plus, optionally, the Bridgewater × Thinking Machines post it links to.
 
 ---
 
 ## Run of show
+
+The timings are a suggestion and have not been rehearsed with a class.
+
+| Time | Block | What happens |
+|---|---|---|
+| **0:00–0:10** | Framing (instructor) | "How do you bring your data to the model?" Prompt vs RAG vs fine-tune (pre-read §2), open vs closed weights (§4), the Bridgewater × Thinking Machines result (§5). |
+| **0:10–0:18** | Ask the original model | On the projector, open the chat ([`notebooks/projector_demo.ipynb`](../notebooks/projector_demo.ipynb)). The chat opens with the instruction the model is given. Ask it three to five messages from the case. Before each answer, ask the class what the company's rules say the answer should be. |
+| **0:18–0:30** | Students label | Hand out the company's rules and the examples to label (see below). Students fill in the labels and send them back. |
+| **0:30–0:42** | Fine-tune on screen | In the chat, press **Fine-tune**, add the labelled file or files, and press **Start**. A progress bar and the training loss show on screen. It takes about 9 to 13 minutes for 100 examples on a T4, so use the time for debrief questions 2 and 3. |
+| **0:42–0:50** | Switch and ask again | Switch the top bar from *Original* to *Fine-tuned*, then press **Ask the same questions again**. Compare the new answers with the earlier ones, and with the rules. |
+| **0:50–1:00** | Debrief and wrap | The remaining questions below, then the takeaway. |
+
+## How the class labels examples
+
+1. **Pick one company** in the chat's top bar before class. The dry run below shows that 100 examples are enough for four of the five; `invoice_intake` needs about 300, so avoid it.
+2. **Get the examples.** In the chat, press **Fine-tune** and download the 100 examples to label. It is a CSV with the messages and one empty column per answer field.
+3. **Share them.** The simplest way is one Google Sheet made from that file, with the rows divided among students or teams. Give students the company's rules: `scenarios/<name>/policy.md`, and the one-page case in `case.md`.
+4. **Collect them.** Download the sheet as CSV (or collect one file per student) and add it in the **Fine-tune** box. The box shows how many labelled examples it read and how many rows it skipped.
+
+**About the labelled files**
+
+- Each file needs the `input` column (or the `id` column from the examples file) and one column per answer field.
+- Several files can be added at once. When two students labelled the same message, the more common label is used.
+- A row is skipped if a label is missing or is not one of the allowed values. Capitals, spaces and hyphens are forgiven: "Baggage services" counts as `baggage_services`.
+- No files? *Use the lab's own labelled examples instead* fine-tunes on 100 of the lab's examples.
+
+## Setup checklist (do this a few days before class)
+
+- [ ] **Run [`notebooks/projector_demo.ipynb`](../notebooks/projector_demo.ipynb) from start to finish on a GPU.** As of 3 October 2026 the chat has been tested in Colab with simulated answers and with a tiny stand-in model, but not yet on the real model on a GPU, because Colab's free GPU limit had been used up. Do a full run, including a fine-tune, before relying on it in class.
+- [ ] **Keep the repository public.** The notebook's first cell runs `git clone` on this repository and branch (set in `scripts/build_notebook.py`).
+- [ ] **Prepare the examples sheet and the rules handout** for the company you picked (see above).
+- [ ] **Plan for the GPU.** Free Colab GPUs are not guaranteed, and the free tier cut ours off after about 5.5 hours of use. Avoid heavy GPU use in the day before class, and have a **Colab Pro** or pay-as-you-go account ready.
+- [ ] **Rehearse the flow without a GPU:** `python -m lab.demo --simulate` from `nemotron-lab/`. Answers are simulated and the page says so.
+- [ ] **Check the model license and access.** `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1` is published under NVIDIA's open model license. Confirm that it is still downloadable without a login and that classroom use is fine.
+- [ ] *(Done once.)* [`notebooks/instructor_dry_run.ipynb`](../notebooks/instructor_dry_run.ipynb) measures, for all five companies, how the original model, the model with the policy pasted in, and fine-tuned models score on 100 held-out test cases. Results are below. `MODE = "quick"` took about 3 hours 20 minutes on a free T4.
+
+**Things to know about the chat**
+
+- One Colab GPU does everything, so the chat cannot answer while the model is fine-tuning.
+- The fine-tuned model is kept only while the notebook session lasts.
+- The chat's address only works in the instructor's own browser, while the notebook is running.
+
+### Dry-run results (free Colab T4, quick mode, 2–3 October 2026)
+
+All fields correct on 100 held-out test cases. Full tables, per-field scores, the raw CSVs and the executed notebook are in [`dry-run-2026-10-03/`](dry-run-2026-10-03/README.md).
+
+| Scenario | Prompt | Prompt + docs | Fine-tuned (100 clean examples) | Fewest examples to clearly beat prompt | Train min / 100 passes | Notes |
+|---|---|---|---|---|---|---|
+| airline_complaints | 7% | 31% | 73% | 100 | 5.7 | Also clearly beats prompt + docs. Noisy labels: 59% |
+| invoice_intake | 1% | 21% | 10% | 100 | 6.4 | **Does not beat prompt + docs at 100.** Needs 300 examples (57%). Noisy labels: 6% |
+| claims_triage | 6% | 15% | 72% | 100 | 5.8 | Also clearly beats prompt + docs. Noisy labels: 37% |
+| expense_audit | 23% | 22% | 75% | 100 | 4.4 | Also clearly beats prompt + docs. Noisy labels: 59% |
+| lead_qualification | 3% | 12% | 54% | 100 | 4.7 | Also clearly beats prompt + docs. Noisy labels: 41% |
+
+Quick mode only tests 100 examples, so "100" means 100 was enough, not that it is the minimum.
+
+**`invoice_intake` needs a different setting.** With 100 examples the model learns to extract the vendor, invoice number and amount, but not the GL code (42%) or the approval path (34%). More examples fix it: 38% all-correct at 200 and 57% at 300, which clearly beats prompt + docs. At 300 examples training takes about 38 minutes on a T4, which is too long for the 60-minute session, so don't assign this scenario at the default settings.
+
+**Giving a fine-tuned model the policy docs as well did not help.** On `invoice_intake`, the model fine-tuned on 200 examples scored 38% with the normal prompt and 37% with the policy pasted in. At 300 examples the policy made it worse: 57% without, 38% with. The model was trained on prompts without the policy, so a prompt with the policy is unfamiliar to it. This is a useful debrief point: fine-tuning and "prompt + docs" do not simply add up.
+
+**Why 100 examples has a good chance of working:** each training sample is drawn so that every answer value appears at least 5 times (at least 3 for 50 examples), so rare rules such as "business class on a short flight" or "enterprise + high intent → enterprise AE" are never missing. Clean and noisy runs use the same messages, so the clean and noisy columns isolate label quality.
+
+**What to expect** (confirm in your dry run). Prompting alone usually gets the "obvious" fields (category, claim type, expense type) partly right but misses the company-specific rules (priority tiers, approval thresholds, SIU red flags, APAC routing), so its *all fields correct* score is low. Pasting the policy in usually helps, at the cost of many more tokens per request. Fine-tuning on 100+ clean examples should give the highest and most consistent scores. Noisy data and 25 examples should visibly underperform. Fields that need arithmetic (expense per-person limits) stay hard for every method, which is a good discussion point.
+
+## Debrief questions and talking points
+
+1. **Which method won, on accuracy and on cost?**
+   Look at prompt tokens per request: "prompt + docs" pays for the whole policy on *every* request. At 4,000 complaints a day that adds up, and a 200-page policy may not fit in the prompt at all. Fine-tuning pays once, at training time, and then runs a small, cheap model.
+
+2. **Tacit judgment.** Our policies were written down, which made "prompt + docs" competitive. In real companies the best experts' judgment often isn't written down: *"I just know this claim smells wrong."* Examples can carry what documents can't. This is the Bridgewater/Thinking Machines thesis.
+
+3. **Data is the asset.** Compare the clean and noisy columns in the dry-run results above, and look at where the class's own labels disagreed. Label quality often matters as much as label quantity. This is why expert-data companies like Mercor exist, and why a firm's historical decisions, if they are clean, can be a moat. Ask: who in your company owns this data today, and is it clean?
+
+4. **Open vs closed weights.** This model runs on a free GPU, on hardware you control, with weights you own. When does that matter? Privacy (claims, expenses), regulation, cost at volume, avoiding vendor lock-in. When wouldn't you bother? Low volume, broad tasks, or no labeled data.
+
+5. **Risk and governance.** Look at the remaining errors: are they cheap (a P2 marked P3) or expensive (an injury claim fast-tracked, a fake vendor auto-approved)? Where does a human stay in the loop? What happens when the policy changes next quarter? The model has to be retrained and re-tested, so who owns that process?
+
+**Takeaway:** *Prompting tells the model what you want. RAG gives it what you know. Fine-tuning teaches it how your best people decide. The scarce input isn't the model, it's clean, expert-labeled data.*
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `No GPU found` | Runtime → Change runtime type → T4 GPU, then re-run the cells |
+| "Cannot connect to GPU backend" | Colab's free GPU limit is used up. Wait for it to reset, or use Colab Pro or pay-as-you-go. Rehearsal mode still works without a GPU |
+| `git clone` fails | Repo isn't public, or the `REPO`/`BRANCH` in the first cell is wrong |
+| A labelled file is rejected | It needs the `input` (or `id`) column and one column per answer field, with the column names from the examples file |
+| Rows are skipped | A label is missing, or is not one of the allowed values listed in the chat's first message |
+| Fine-tuning takes too long | Time grows with the number of examples. Press **Stop**; the original model is unchanged. Use about 100 examples |
+| The chat page stops responding | The notebook session ended. Re-run the notebook's cells. The fine-tuned model is lost and has to be trained again |
+
+---
+
+## Earlier version: every student runs the notebook (not the plan for this session)
+
+[`notebooks/finetune_lab.ipynb`](../notebooks/finetune_lab.ipynb) is an earlier design in which each student fine-tunes the model in their own Colab session. It is kept for reference. Everything below this line describes that version only.
+
+### Run of show (student-run version)
 
 | Time | Block | What happens |
 |---|---|---|
@@ -22,7 +122,7 @@
 
 **If you are short on time:** skip Step 3 (prompt + docs) and Step 7. That saves ~5 minutes.
 
-## Teams and settings cards
+### Teams and settings cards
 
 Every student runs **their own notebook** (free Colab gives each Google account its own GPU). Teams of 4–5 work on one scenario, and each team member takes a different settings card, so every team produces a mini-experiment.
 
@@ -36,7 +136,7 @@ Every student runs **their own notebook** (free Colab gives each Google account 
 
 **Scenario assignment:** with 18 teams, give each of the 5 scenarios to 3–4 teams. To keep the debrief tight, you can concentrate on the two finance scenarios (`invoice_intake`, `expense_audit`), which connect most directly to the Bridgewater case.
 
-## Leaderboard
+### Leaderboard
 
 Create a Google Sheet (or Form) with one column. Students paste the line printed by Step 8, for example:
 
@@ -46,84 +146,12 @@ team=team-3 | scenario=claims_triage | examples=100 | data=clean | epochs=2 | pr
 
 Use *Data → Split text to columns* on `|` to chart it live.
 
-## Projector demo: chat before and after fine-tuning (optional)
+### Setup and troubleshooting (student-run version)
 
-[`notebooks/projector_demo.ipynb`](../notebooks/projector_demo.ipynb) opens a plain chat page for the projector, with the same model and companies as the lab.
-
-1. **Ask.** The chat opens with the lab's instruction as the first message, and the model's reply to it. Type a message (or pick one of the three starter messages). The original model answers.
-2. **Collect labels.** Press **Fine-tune**, download the examples file, and share it with the class, for example as a Google Sheet. Students fill in the label columns using the company's rules and send the file back as CSV.
-3. **Fine-tune.** Add the files they sent and press **Start**. A progress bar and the training loss show on screen. Allow about 9 to 13 minutes for 100 examples on a T4.
-4. **Switch and ask again.** Switch the top bar from *Original* to *Fine-tuned*, then press **Ask the same questions again**.
-
-**About the labelled files**
-
-- Each file needs the `input` column (or the `id` column from the examples file) and one column per answer field.
-- Several files can be added at once. When two students labelled the same message, the more common label is used.
-- A row is skipped if a label is missing or is not one of the allowed values. Capitals, spaces and hyphens are forgiven: "Baggage services" counts as `baggage_services`.
-- No files? *Use the lab's own labelled examples instead* fine-tunes on 100 of the lab's examples.
-
-**Things to know**
-
-- Rehearse on a laptop with no GPU: `python -m lab.demo --simulate` from `nemotron-lab/`. Answers are simulated and the page says so.
-- One Colab GPU does everything, so the chat cannot answer while the model is fine-tuning.
-- The fine-tuned model is kept only while the notebook session lasts.
-- As of 3 October 2026 the chat has been tested with simulated answers and with a tiny stand-in model, but not yet on the real model on a GPU. Do a full run before relying on it in class.
-
-## Setup checklist (do this a few days before class)
-
-- [ ] **Make the notebook reachable.** The notebook's first cell runs `git clone` on this repository and branch (set in `scripts/build_notebook.py`). The repo must be **public** for students to clone it without logging in, or you can copy the `nemotron-lab/` folder into a public course repo and update `REPO`/`BRANCH`, then run `python scripts/build_notebook.py`.
-- [ ] **Share the notebook link:** `https://colab.research.google.com/github/<owner>/<repo>/blob/<branch>/nemotron-lab/notebooks/finetune_lab.ipynb`. If the branch name contains a `/`, merge to `main` first and use `main` in the link.
-- [ ] **Run [`notebooks/instructor_dry_run.ipynb`](../notebooks/instructor_dry_run.ipynb) in Colab.** For all five scenarios it runs both baselines, fine-tunes at each settings card, and reports the **fewest training examples that give a clear improvement**, meaning the fine-tuned 95% range lies entirely above the baseline's. `MODE = "quick"` (cards B and D, about 3 hours 20 minutes on a free T4 when measured) tells you whether the default of 100 examples is enough. `MODE = "full"` gives the whole learning curve but was not measured; by extrapolation it needs roughly 10 hours on a T4, and the free tier cut the GPU off after about 5.5 hours, so use an L4 or A100 with Colab Pro. Results save to Google Drive after every run, so a disconnect loses nothing. Copy the results into the table below.
-- [ ] **Check the model license and access.** `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1` is published under NVIDIA's open model license. Confirm that it is still downloadable without a login and that classroom use is fine.
-- [ ] **Have a backup.** Free Colab GPUs are usually available but not guaranteed for 90 people at once. Have a **Colab Pro** account ready to project a full run, and tell students without a GPU to pair up with a teammate.
-- [ ] *(Optional)* Ask students to run Step 0 before class. Colab sessions time out after ~90 minutes idle, so only do this right before class.
-
-### Dry-run results (free Colab T4, quick mode, 2–3 October 2026)
-
-All fields correct on 100 held-out test cases. Full tables, per-field scores, the raw CSVs and the executed notebook are in [`dry-run-2026-10-03/`](dry-run-2026-10-03/README.md).
-
-| Scenario | Prompt | Prompt + docs | Fine-tuned (card B) | Fewest examples to clearly beat prompt | Train min / 100 passes | Notes |
-|---|---|---|---|---|---|---|
-| airline_complaints | 7% | 31% | 73% | 100 | 5.7 | Also clearly beats prompt + docs. Card D (noisy): 59% |
-| invoice_intake | 1% | 21% | 10% | 100 | 6.4 | **Does not beat prompt + docs at 100.** Needs 300 examples (57%). Card D: 6% |
-| claims_triage | 6% | 15% | 72% | 100 | 5.8 | Also clearly beats prompt + docs. Card D: 37% |
-| expense_audit | 23% | 22% | 75% | 100 | 4.4 | Also clearly beats prompt + docs. Card D: 59% |
-| lead_qualification | 3% | 12% | 54% | 100 | 4.7 | Also clearly beats prompt + docs. Card D: 41% |
-
-Quick mode only tests 100 examples, so "100" means 100 was enough, not that it is the minimum.
-
-**`invoice_intake` needs a different setting.** With 100 examples the model learns to extract the vendor, invoice number and amount, but not the GL code (42%) or the approval path (34%). More examples fix it: 38% all-correct at 200 and 57% at 300, which clearly beats prompt + docs. At 300 examples training takes about 38 minutes on a T4, which is too long for the 60-minute session, so don't assign this scenario at the default settings.
-
-**Giving a fine-tuned model the policy docs as well did not help.** On `invoice_intake`, the model fine-tuned on 200 examples scored 38% with the normal prompt and 37% with the policy pasted in. At 300 examples the policy made it worse: 57% without, 38% with. The model was trained on prompts without the policy, so a prompt with the policy is unfamiliar to it. This is a useful debrief point: fine-tuning and "prompt + docs" do not simply add up.
-
-**If a scenario reports "not reached" for 100 examples:** raise `N_EXAMPLES` in the notebook's Step 4 default (and on cards B and D) to the number the dry run reports, or drop that scenario. Training time grows roughly in proportion to `N_EXAMPLES × EPOCHS`.
-
-**Why 100 examples has a good chance of working:** each training sample is drawn so that every answer value appears at least 5 times (at least 3 for 50 examples), so rare rules such as "business class on a short flight" or "enterprise + high intent → enterprise AE" are never missing. Clean and noisy runs use the same messages, so card B vs card D isolates label quality.
-
-**What to expect** (confirm in your dry run). Prompting alone usually gets the "obvious" fields (category, claim type, expense type) partly right but misses the company-specific rules (priority tiers, approval thresholds, SIU red flags, APAC routing), so its *all fields correct* score is low. Pasting the policy in usually helps, at the cost of many more tokens per request. Fine-tuning on 100+ clean examples should give the highest and most consistent scores. Noisy data and 25 examples should visibly underperform. Fields that need arithmetic (expense per-person limits) stay hard for every method, which is a good discussion point.
-
-## Debrief questions and talking points
-
-1. **Which method won, on accuracy and on cost?**
-   Look at prompt tokens per request: "prompt + docs" pays for the whole policy on *every* request. At 4,000 complaints a day that adds up, and a 200-page policy may not fit in the prompt at all. Fine-tuning pays once, at training time, and then runs a small, cheap model.
-
-2. **Tacit judgment.** Our policies were written down, which made "prompt + docs" competitive. In real companies the best experts' judgment often isn't written down: *"I just know this claim smells wrong."* Examples can carry what documents can't. This is the Bridgewater/Thinking Machines thesis.
-
-3. **Data is the asset.** Compare cards B vs D and C vs E across teams. Label quality often matters as much as label quantity. This is why expert-data companies like Mercor exist, and why a firm's historical decisions, if they are clean, can be a moat. Ask: who in your company owns this data today, and is it clean?
-
-4. **Open vs closed weights.** The students' model runs on a free GPU, on hardware they control, with weights they own. When does that matter? Privacy (claims, expenses), regulation, cost at volume, avoiding vendor lock-in. When wouldn't they bother? Low volume, broad tasks, or no labeled data.
-
-5. **Risk and governance.** Look at the remaining errors: are they cheap (a P2 marked P3) or expensive (an injury claim fast-tracked, a fake vendor auto-approved)? Where does a human stay in the loop? What happens when the policy changes next quarter? The model has to be retrained and re-tested, so who owns that process?
-
-**Takeaway:** *Prompting tells the model what you want. RAG gives it what you know. Fine-tuning teaches it how your best people decide. The scarce input isn't the model, it's clean, expert-labeled data.*
-
-## Troubleshooting
-
-| Symptom | Fix |
-|---|---|
-| `No GPU found` | Runtime → Change runtime type → T4 GPU, then re-run Step 0 |
-| "Cannot connect to GPU backend" | Colab is out of free GPUs: pair up with a teammate, or use the instructor's projected run |
-| `git clone` fails | Repo isn't public, or the `REPO`/`BRANCH` in the first cell is wrong |
-| Out of memory during training | Runtime → Restart session, re-run Step 0, use fewer examples |
-| Training is slow (> 8 min) | Choose `N_EXAMPLES × EPOCHS ≤ 300` |
-| Want to retrain | Just change Step 4 and re-run Steps 5–6. Each run starts from the original model |
+- Share the notebook link: `https://colab.research.google.com/github/<owner>/<repo>/blob/<branch>/nemotron-lab/notebooks/finetune_lab.ipynb`. If the branch name contains a `/`, merge to `main` first and use `main` in the link.
+- Free Colab GPUs are not guaranteed for 90 people at once. Tell students without a GPU to pair up with a teammate.
+- Colab sessions time out after about 90 minutes idle, so only ask students to run Step 0 right before class.
+- If the dry run reports "not reached" for 100 examples: raise `N_EXAMPLES` in the notebook's Step 4 default (and on cards B and D) to the number the dry run reports, or drop that scenario. Training time grows roughly in proportion to `N_EXAMPLES × EPOCHS`.
+- Out of memory during training: Runtime → Restart session, re-run Step 0, use fewer examples.
+- Training is slow (over 8 minutes): choose `N_EXAMPLES × EPOCHS ≤ 300`.
+- To retrain, change Step 4 and re-run Steps 5–6. Each run starts from the original model.

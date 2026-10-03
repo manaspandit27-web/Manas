@@ -1,10 +1,19 @@
 # Nemotron fine-tuning lab: bringing your data to the model
 
-A starting point for an in-class activity for the DSAIL session on **Data and Fine-Tuning Models**. Students fine-tune an open-weight model (NVIDIA **Llama-3.1-Nemotron-Nano-4B**) on one of five business processes (synthetic data I generated) in Google Colab. They can compare three ways of bringing company knowledge to a model on the same held-out test cases:
+A starting point for an in-class activity for the DSAIL session on **Data and Fine-Tuning Models**. The instructor runs an open-weight model (NVIDIA **Llama-3.1-Nemotron-Nano-4B**) on the projector, on one of five business processes (synthetic data I generated). Students don't run anything: they label examples, and the model is fine-tuned on their labels in front of the class.
+
+How the session would run:
+
+1. **Ask.** The instructor opens a chat with the model on the projector and asks it questions from the business process. It performs poorly.
+2. **Label.** Students label example messages using the company's rules and send them back.
+3. **Fine-tune.** The instructor fine-tunes the model on the class's labels, on screen (about 10 minutes for 100 examples on a free Colab GPU).
+4. **Ask again.** The instructor switches the chat to the fine-tuned model and asks the same questions again.
+
+Before class, the dry run compares three ways of bringing company knowledge to a model on the same held-out test cases:
 
 1. **Prompt only:** the task and allowed answers.
 2. **Prompt + docs:** the company policy pasted into every request (basically what RAG would automate, so a good chance to touch on that as well).
-3. **Fine-tuned:** LoRA training on expert-labeled examples. Students choose how many examples and how clean they are.
+3. **Fine-tuned:** LoRA training on labeled examples. In class the labels come from the students.
 
 This is just a demo to get the ball rolling! The session follows the idea in Bridgewater × Thinking Machines, *[Learning to Replicate Expert Judgment in Financial Tasks](https://thinkingmachines.ai/news/learning-to-replicate-expert-judgment-in-financial-tasks/)* (June 2026): expert judgment that is hard to put in a prompt can be taught through labeled examples.
 
@@ -12,15 +21,15 @@ This is just a demo to get the ball rolling! The session follows the idea in Bri
 
 | Path | For | What it is |
 |---|---|---|
-| [`PRE-READ.md`](PRE-READ.md) | Students, before class | 15-minute interactive note: prompting vs RAG vs fine-tuning, determinism, open vs closed weights, the Bridgewater case |
-| [`notebooks/finetune_lab.ipynb`](notebooks/finetune_lab.ipynb) | Students, in class | The Colab notebook. Students run it top to bottom and edit only the ✏️ cells |
-| [`notebooks/instructor_dry_run.ipynb`](notebooks/instructor_dry_run.ipynb) | Instructors, before class | Runs baselines and fine-tuning sweeps on all 5 scenarios (100 test cases each) and reports the fewest examples that give a clear improvement - this is for us to test and make sure it works (I've run it once) |
 | [`notebooks/projector_demo.ipynb`](notebooks/projector_demo.ipynb) | Instructors, in class | A plain chat page for the projector: I have the idea that we would open this on projector, ask the model our questions, see that it performs poorly, then fine-tune it on examples the class labelled, and then ask again and note the improvements.|
-| [`instructor/INSTRUCTOR-GUIDE.md`](instructor/INSTRUCTOR-GUIDE.md) | Instructors | 60-minute run of show, settings cards, setup checklist, debrief questions, troubleshooting |
+| [`PRE-READ.md`](PRE-READ.md) | Students, before class | 15-minute interactive note: prompting vs RAG vs fine-tuning, determinism, open vs closed weights, the Bridgewater case |
+| [`notebooks/instructor_dry_run.ipynb`](notebooks/instructor_dry_run.ipynb) | Instructors, before class | Runs baselines and fine-tuning sweeps on all 5 scenarios (100 test cases each) and reports the fewest examples that give a clear improvement - this is for us to test and make sure it works (I've run it once) |
+| [`instructor/INSTRUCTOR-GUIDE.md`](instructor/INSTRUCTOR-GUIDE.md) | Instructors | Run of show, how the class labels examples, setup checklist, debrief questions, troubleshooting |
 | [`instructor/dry-run-2026-10-03/`](instructor/dry-run-2026-10-03/README.md) | Instructors | Results of thd full dry run on a free Colab T4 I ran: tables, raw CSVs, executed notebook |
 | `scenarios/<name>/` | Both | `case.md` (1-page case), `policy.md` (the expert rules), `train.csv` (600 expert-labeled), `train_noisy.csv` (same, 30% mislabeled), `test.csv` (100 held out) |
 | `lab/demo.py`, `lab/demo_ui.html` | Under the hood | The projector chat: a small web server and its page |
 | `lab/core.py` | Under the hood | Loading, prompting, LoRA training and scoring, kept out of the notebook so cells stay short |
+| [`notebooks/finetune_lab.ipynb`](notebooks/finetune_lab.ipynb) | Not used in the session | An earlier version in which every student runs the fine-tuning themselves in Colab. Kept for reference |
 | `scripts/` | Maintainers | `generate_data.py` rebuilds the datasets; `build_notebook.py` rebuilds both notebooks |
 | `tests/` | Maintainers | Data checks and a CPU smoke test of the full train → evaluate loop on a tiny stand-in model |
 
@@ -38,7 +47,9 @@ All companies, people and data are synthetic. Labels come from applying each `po
 
 ## Running it
 
-**In Colab:** open `notebooks/finetune_lab.ipynb` in Colab, choose a **T4 GPU** runtime, and run the cells in order. The first cell clones this repo, so the repo has to be public (see the instructor setup checklist).
+**In Colab (instructor only):** open `notebooks/projector_demo.ipynb` in Colab, choose a **T4 GPU** runtime, run the cells in order, and open the chat address the notebook prints. The first cell clones this repo, so the repo has to be public (see the instructor setup checklist).
+
+**Rehearse without a GPU:** `python -m lab.demo --simulate` from `nemotron-lab/` opens the same chat with simulated answers.
 
 **Locally (maintainers):**
 

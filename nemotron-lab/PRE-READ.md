@@ -1,6 +1,6 @@
 # Pre-read: How do you bring your data to a model? (Just something Claude generated, not sure if we will have pre-work or not)
 
-*About 15 minutes. Read before class. You will fine-tune a real AI model in class, so no coding background is needed, but this note is.*
+*About 15 minutes. Read before class. In class you will label the examples that a real AI model is fine-tuned on. No coding background is needed, but this note is.*
 
 ---
 
@@ -37,7 +37,7 @@ These aren't mutually exclusive. Many real systems fine-tune a model *and* use R
 <details>
 <summary><b>Quick check:</b> You want 50,000 insurance claims a day routed exactly the way your best claims manager would. Which one?</summary>
 
-**Fine-tuning** is the strongest candidate: a narrow, high-volume, repeatable judgment with a clear right answer and lots of historical examples. You would still test it against prompting and RAG, which is exactly what you'll do in class.
+**Fine-tuning** is the strongest candidate: a narrow, high-volume, repeatable judgment with a clear right answer and lots of historical examples. You would still test it against prompting and RAG, which is what we'll look at in class.
 </details>
 
 ## 3. What fine-tuning actually does
@@ -79,7 +79,7 @@ It is deterministic, but not useful. Consistency is only valuable when it is con
 | **Cost** | Pay per token, on every request | Pay for your own hardware; small models are cheap to run at scale |
 | **Who owns the result** | The vendor owns the model | You own your fine-tuned weights |
 
-In class you'll use **NVIDIA Llama-3.1-Nemotron-Nano-4B**, an open-weight model from NVIDIA's Nemotron family, small enough to fine-tune on a free Google Colab GPU.
+In class we'll use **NVIDIA Llama-3.1-Nemotron-Nano-4B**, an open-weight model from NVIDIA's Nemotron family, small enough to fine-tune on a free Google Colab GPU.
 
 ## 5. Case in point: replicating expert judgment in finance
 
@@ -105,18 +105,16 @@ Keep a question in mind for class: **is your company's labeled data a strategic 
 
 ## 6. What you'll do in class
 
-You'll work in teams on one of five business processes: airline complaint triage, accounts-payable invoice intake, insurance claims routing, expense-policy audit, or B2B sales-lead qualification. Each one comes with a short case, a policy document, and 600 expert-labeled examples. You will:
+We'll take one business process, for example airline complaint triage, accounts-payable invoice intake, insurance claims routing, expense-policy audit, or B2B sales-lead qualification. Each one comes with a short case and a policy document. You won't run any code. In class:
 
-1. test Nemotron with **prompting only**,
-2. test it with the **policy document pasted in** (what RAG automates),
-3. **fine-tune it** on expert-labeled examples, choosing how many and how clean,
-4. compare all three on 60 held-out cases, then try to break your model.
+1. the instructor asks **Nemotron, as downloaded,** to do the job on the projector, and you judge its answers against the policy,
+2. **you label examples:** you read messages and apply the policy, the way the company's experts would,
+3. the instructor **fine-tunes the model on the class's labels**, live,
+4. we ask the fine-tuned model **the same questions again** and compare.
 
 ## 7. Before class (5 minutes)
 
-- [ ] Make sure you can sign in to **Google Colab** (colab.research.google.com) with a Google account.
-- [ ] Open the lab notebook link your instructor sent and check that **Runtime → Change runtime type → T4 GPU** is available.
-- [ ] Bring a laptop and charger. A phone won't work.
+- [ ] Bring a laptop or tablet. You'll use it to label examples.
 
 ## Glossary
 
