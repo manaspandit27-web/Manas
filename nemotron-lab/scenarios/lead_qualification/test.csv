@@ -1,0 +1,101 @@
+id,input,segment,intent,route
+lea-te-0000,"Zara Okafor here from Nimbus Retail in Toronto. We're a company of 1,500. We have an RFP going out in two weeks and want Lumen in it. Can someone call me?",mid_market,high,sdr
+lea-te-0001,"We've used Lumen for one years at Cobalt Health (a company of 1,500, Madrid). Not looking to buy anything, just wanted to see the webinar recording.",mid_market,low,account_management
+lea-te-0002,Web form - Name: Ibrahim Okafor. Company: Harbor Pharma. Title: Analytics Manager. Location: Dubai. Size: a team of 85. Message: Downloaded your e-book on dashboards. Just browsing for now.,smb,low,nurture
+lea-te-0003,"Olu Patel here from Redwood Biotech in Berlin. We're about 300 employees. Not looking to buy anything, just wanted to see the webinar recording.",mid_market,low,nurture
+lea-te-0004,"Web form - Name: Ibrahim Brooks. Company: Nimbus Retail. Title: Head of Data. Location: Paris. Size: about 1,200 employees. Message: Exploring options for next year's planning. What are typical implementation timelines?",mid_market,medium,sdr
+lea-te-0005,"Hi, I'm Chen Okafor, Analytics Manager at Atlas Freight (a company of 120, based in Seoul). Signing up for the newsletter.",smb,low,partner_channel
+lea-te-0006,Web form - Name: Samuel Rossi. Company: Tidewater Energy. Title: Senior Analyst. Location: Austin. Size: ~120 people. Message: Signing up for the newsletter.,smb,low,nurture
+lea-te-0007,"Web form - Name: Aisha Garcia. Company: Quarry Capital. Title: Head of Data. Location: Dubai. Size: about 4,000 employees. Message: Downloaded your e-book on dashboards. Just browsing for now.",enterprise,low,nurture
+lea-te-0008,"Olu Singh here from Redwood Biotech in London. We're about 4,000 employees. Please send pricing for 125 seats; we're ready to sign if it fits.",enterprise,high,enterprise_ae
+lea-te-0009,"Hi, Noah Okafor from Atlas Freight in Singapore - we're already a Lumen customer (6,500 staff). We're comparing a few analytics platforms. How does Lumen differ from Tableau?",enterprise,medium,account_management
+lea-te-0010,"Olu Larsen here from Ivory Media in Boston. We're 25,000 staff. We have an RFP going out in two weeks and want Lumen in it. Can someone call me?",enterprise,high,enterprise_ae
+lea-te-0011,"Hi, I'm James Kim, Chief Digital Officer at Ivory Media (a team of 40, based in Paris). Curious about your forecasting features - do you have case studies in our industry?",smb,medium,self_serve
+lea-te-0012,Yara Rossi here from Fernhill Foods in Austin. We're 60 staff. Can we get a demo next week? We need to pick a vendor by end of month.,smb,high,self_serve
+lea-te-0013,"Hi, I'm Aisha Shah, Analytics Manager at Juniper Schools (about 2,800 employees, based in Boston). Does Lumen integrate with Snowflake and Salesforce?",enterprise,medium,sdr
+lea-te-0014,Grace Haddad here from Brightwater Logistics in Seattle. We're a company of 120. Downloaded your e-book on dashboards. Just browsing for now.,smb,low,nurture
+lea-te-0015,"Hi, Luca Shah from Cobalt Health in London - we're already a Lumen customer (25 staff). Signing up for the newsletter.",smb,low,account_management
+lea-te-0016,Mateo Haddad here from Pelican Insurance in Tokyo. We're just 60 of us. Curious about your forecasting features - do you have case studies in our industry?,smb,medium,partner_channel
+lea-te-0017,Mei Larsen here from Atlas Freight in Toronto. We're 25 staff. Signing up for the newsletter.,smb,low,nurture
+lea-te-0018,"Web form - Name: Ibrahim Tanaka. Company: Nimbus Retail. Title: Chief Digital Officer. Location: Seoul. Size: a team of 12. Message: Not looking to buy anything, just wanted to see the webinar recording.",smb,low,partner_channel
+lea-te-0019,Olu Patel here from Cobalt Health in Mumbai. We're 85 staff. Does Lumen integrate with Snowflake and Salesforce?,smb,medium,partner_channel
+lea-te-0020,"Hi, I'm Mei Larsen, Director of Finance at Pelican Insurance (~600 people, based in Atlanta). Signing up for the newsletter.",mid_market,low,nurture
+lea-te-0021,Web form - Name: Elena Okafor. Company: Sable Manufacturing. Title: Head of Data. Location: Chicago. Size: a company of 450. Message: Exploring options for next year's planning. What are typical implementation timelines?,mid_market,medium,sdr
+lea-te-0022,"Hi, I'm Zara Larsen, Analytics Manager at Keystone Credit Union (~120 people, based in Amsterdam). Can we get a demo next week? We need to pick a vendor by end of month.",smb,high,self_serve
+lea-te-0023,"We've used Lumen for two years at Harbor Pharma (a team of 12, Tokyo). Please send pricing for 257 seats; we're ready to sign if it fits.",smb,high,account_management
+lea-te-0024,"Hi, I'm Luca Dubois, COO at Ivory Media (about 1,200 employees, based in Seattle). Please send pricing for 365 seats; we're ready to sign if it fits.",mid_market,high,sdr
+lea-te-0025,"Hi, I'm Mei Murphy, Head of Data at Fernhill Foods (a company of 120, based in London). Exploring options for next year's planning. What are typical implementation timelines?",smb,medium,self_serve
+lea-te-0026,Web form - Name: Dev Okafor. Company: Nimbus Retail. Title: Analytics Manager. Location: Atlanta. Size: about 85 employees. Message: Interested in the free template pack.,smb,low,nurture
+lea-te-0027,"Diego Tanaka here from Sable Manufacturing in Madrid. We're ~2,800 people. Does Lumen integrate with Snowflake and Salesforce?",enterprise,medium,sdr
+lea-te-0028,"Hi, I'm Arjun Larsen, VP of Operations at Ivory Media (~900 people, based in Austin). Exploring options for next year's planning. What are typical implementation timelines?",mid_market,medium,sdr
+lea-te-0029,Olu Patel here from Tidewater Energy in Berlin. We're about 300 employees. Signing up for the newsletter.,mid_market,low,nurture
+lea-te-0030,"Web form - Name: Priya Okafor. Company: Cobalt Health. Title: Head of Data. Location: Sydney. Size: 1,500 staff. Message: Can we get a demo next week? We need to pick a vendor by end of month.",mid_market,high,partner_channel
+lea-te-0031,"Hi, Olu Murphy from Fernhill Foods in Chicago - we're already a Lumen customer (~6,500 people). Does Lumen integrate with Snowflake and Salesforce?",enterprise,medium,account_management
+lea-te-0032,"Hi, I'm Tom Brooks, Senior Analyst at Harbor Pharma (~600 people, based in Berlin). Curious about your forecasting features - do you have case studies in our industry?",mid_market,medium,sdr
+lea-te-0033,Web form - Name: Camila Tanaka. Company: Ivory Media. Title: Analytics Manager. Location: Seoul. Size: about 300 employees. Message: We're comparing a few analytics platforms. How does Lumen differ from Tableau?,mid_market,medium,partner_channel
+lea-te-0034,"We've used Lumen for one years at Nimbus Retail (about 25,000 employees, Amsterdam). Interested in the free template pack.",enterprise,low,account_management
+lea-te-0035,"Hi, I'm Priya Kim, Senior Analyst at Cobalt Health (just 40 of us, based in London). Does Lumen integrate with Snowflake and Salesforce?",smb,medium,self_serve
+lea-te-0036,"Web form - Name: Sofia Brooks. Company: Atlas Freight. Title: VP of Operations. Location: Madrid. Size: ~4,000 people. Message: Can we get a demo next week? We need to pick a vendor by end of month.",enterprise,high,enterprise_ae
+lea-te-0037,"Mateo Ali here from Quarry Capital in Dubai. We're a company of 60,000. Can we get a demo next week? We need to pick a vendor by end of month.",enterprise,high,enterprise_ae
+lea-te-0038,"Hi, I'm Nina Shah, Head of Data at Pelican Insurance (a company of 60,000, based in Amsterdam). We'd like a demo and pricing - budget is approved for this quarter.",enterprise,high,enterprise_ae
+lea-te-0039,"Yara Okafor here from Ivory Media in Singapore. We're a company of 2,800. Signing up for the newsletter.",enterprise,low,partner_channel
+lea-te-0040,"Hi, I'm Tom Rossi, Analytics Manager at Redwood Biotech (a team of 25, based in Tokyo). Can we get a demo next week? We need to pick a vendor by end of month.",smb,high,partner_channel
+lea-te-0041,Web form - Name: Omar Reyes. Company: Brightwater Logistics. Title: Chief Digital Officer. Location: Austin. Size: a company of 900. Message: Can we get a demo next week? We need to pick a vendor by end of month.,mid_market,high,sdr
+lea-te-0042,"Web form - Name: Elena Rossi. Company: Pelican Insurance. Title: VP of Operations. Location: Toronto. Size: a team of 12. Message: Not looking to buy anything, just wanted to see the webinar recording.",smb,low,nurture
+lea-te-0043,I saw a job posting for a solutions engineer - who should I send my resume to? (Seoul),unknown,low,disqualify
+lea-te-0044,"Web form - Name: Luca Kim. Company: Fernhill Foods. Title: VP of Operations. Location: Toronto. Size: a company of 60,000. Message: Please send pricing for 157 seats; we're ready to sign if it fits.",enterprise,high,enterprise_ae
+lea-te-0045,Samuel Okafor here from Redwood Biotech in Singapore. We're 300 staff. We're comparing a few analytics platforms. How does Lumen differ from Tableau?,mid_market,medium,partner_channel
+lea-te-0046,Grace Wang here from Marlow Hotels in Amsterdam. We're a team of 40. We're comparing a few analytics platforms. How does Lumen differ from Tableau?,smb,medium,self_serve
+lea-te-0047,"Hi, I'm James Haddad, Head of Data at Fernhill Foods (about 1,500 employees, based in Singapore). Signing up for the newsletter.",mid_market,low,partner_channel
+lea-te-0048,"Hi, I'm Arjun Patel, CFO at Sable Manufacturing (a company of 85, based in Atlanta). Please send pricing for 394 seats; we're ready to sign if it fits.",smb,high,self_serve
+lea-te-0049,"We've used Lumen for three years at Sable Manufacturing (6,500 staff, Toronto). Signing up for the newsletter.",enterprise,low,account_management
+lea-te-0050,Web form - Name: Rachel Mensah. Company: Juniper Schools. Title: Chief Digital Officer. Location: Jakarta. Size: a company of 900. Message: We have an RFP going out in two weeks and want Lumen in it. Can someone call me?,mid_market,high,partner_channel
+lea-te-0051,Maria Patel here from Tidewater Energy in Dubai. We're ~900 people. Signing up for the newsletter.,mid_market,low,nurture
+lea-te-0052,"Nina Novak here from Brightwater Logistics in Seattle. We're ~25,000 people. We're comparing a few analytics platforms. How does Lumen differ from Tableau?",enterprise,medium,sdr
+lea-te-0053,"Dev Mensah here from Nimbus Retail in Toronto. We're 2,800 staff. Please send pricing for 94 seats; we're ready to sign if it fits.",enterprise,high,enterprise_ae
+lea-te-0054,"Fatima Singh here from Tidewater Energy in Chicago. We're a company of 60,000. Curious about your forecasting features - do you have case studies in our industry?",enterprise,medium,sdr
+lea-te-0055,"Web form - Name: Elena Garcia. Company: Atlas Freight. Title: CFO. Location: Mumbai. Size: about 6,500 employees. Message: Not looking to buy anything, just wanted to see the webinar recording.",enterprise,low,partner_channel
+lea-te-0056,Camila Novak from a cloud reseller in Austin. We'd like to sell you our data-labeling services.,unknown,low,disqualify
+lea-te-0057,Samuel Novak here from Sable Manufacturing in Dubai. We're just 12 of us. Curious about your forecasting features - do you have case studies in our industry?,smb,medium,self_serve
+lea-te-0058,"Hi, I'm Olu Patel, CFO at Fernhill Foods (40 staff, based in London). Does Lumen integrate with Snowflake and Salesforce?",smb,medium,self_serve
+lea-te-0059,"Web form - Name: Maria Novak. Company: Juniper Schools. Title: Senior Analyst. Location: Atlanta. Size: ~1,200 people. Message: We're comparing a few analytics platforms. How does Lumen differ from Tableau?",mid_market,medium,sdr
+lea-te-0060,"Hello, I'm Yara Shah, a data analyst in Chicago. Are you hiring? I'd love to join Lumen.",unknown,low,disqualify
+lea-te-0061,"Arjun Haddad here from Redwood Biotech in Boston. We're ~2,800 people. Interested in the free template pack.",enterprise,low,nurture
+lea-te-0062,"Hi, I'm Ben Okafor, Senior Analyst at Marlow Hotels (just 25 of us, based in Atlanta). Not looking to buy anything, just wanted to see the webinar recording.",smb,low,nurture
+lea-te-0063,"Hi, I'm Yara Cohen, Director of Finance at Quarry Capital (a company of 25,000, based in Amsterdam). Interested in the free template pack.",enterprise,low,nurture
+lea-te-0064,Kenji Rossi here from Marlow Hotels in Jakarta. We're ~40 people. Signing up for the newsletter.,smb,low,partner_channel
+lea-te-0065,Web form - Name: Priya Silva. Company: Harbor Pharma. Title: Director of Finance. Location: Madrid. Size: a team of 85. Message: Can we get a demo next week? We need to pick a vendor by end of month.,smb,high,self_serve
+lea-te-0066,"Hi, I'm Tom Kim, Senior Analyst at Keystone Credit Union (~4,000 people, based in Seoul). Can we get a demo next week? We need to pick a vendor by end of month.",enterprise,high,partner_channel
+lea-te-0067,"We've used Lumen for 5 years at Redwood Biotech (about 40 employees, Toronto). Curious about your forecasting features - do you have case studies in our industry?",smb,medium,account_management
+lea-te-0068,"Hi, I'm Nina Shah, VP of Operations at Tidewater Energy (about 1,500 employees, based in Amsterdam). We'd like a demo and pricing - budget is approved for this quarter.",mid_market,high,sdr
+lea-te-0069,"Hi, I'm Fatima Novak, Head of Data at Sable Manufacturing (a company of 2,800, based in Singapore). Does Lumen integrate with Snowflake and Salesforce?",enterprise,medium,partner_channel
+lea-te-0070,"Hi, Rachel Silva from Harbor Pharma in Seattle - we're already a Lumen customer (a company of 600). Signing up for the newsletter.",mid_market,low,account_management
+lea-te-0071,"Luca Kim here from Quarry Capital in Toronto. We're a company of 6,500. Curious about your forecasting features - do you have case studies in our industry?",enterprise,medium,sdr
+lea-te-0072,Chen Wang here from Tidewater Energy in Paris. We're ~12 people. We'd like a demo and pricing - budget is approved for this quarter.,smb,high,self_serve
+lea-te-0073,"Hi, I'm Camila Singh, Analytics Manager at Harbor Pharma (just 12 of us, based in Seoul). Not looking to buy anything, just wanted to see the webinar recording.",smb,low,partner_channel
+lea-te-0074,"Hello, I'm Luca Haddad, a data analyst in Chicago. Are you hiring? I'd love to join Lumen.",unknown,low,disqualify
+lea-te-0075,"Hi, I'm Samuel Wang, Director of Finance at Harbor Pharma (~120 people, based in Seattle). Can we get a demo next week? We need to pick a vendor by end of month.",smb,high,self_serve
+lea-te-0076,University student here working on a class project about analytics vendors. We're comparing a few analytics platforms. How does Lumen differ from Tableau?,unknown,low,disqualify
+lea-te-0077,"Hi, I'm Ben Shah, CFO at Ivory Media (about 60,000 employees, based in Amsterdam). Signing up for the newsletter.",enterprise,low,nurture
+lea-te-0078,"Hi, I'm Nina Shah, Analytics Manager at Atlas Freight (about 6,500 employees, based in Chicago). We're comparing a few analytics platforms. How does Lumen differ from Tableau?",enterprise,medium,sdr
+lea-te-0079,Web form - Name: Olu Wang. Company: Tidewater Energy. Title: CFO. Location: Berlin. Size: 300 staff. Message: Signing up for the newsletter.,mid_market,low,nurture
+lea-te-0080,"Hi, I'm Dev Okafor, Head of Data at Brightwater Logistics (85 staff, based in Austin). Signing up for the newsletter.",smb,low,nurture
+lea-te-0081,Omar Kim from a cloud reseller in Austin. We'd like to sell you our data-labeling services.,unknown,low,disqualify
+lea-te-0082,"Hi, I'm Tom Dubois, Analytics Manager at Juniper Schools (about 12,000 employees, based in Jakarta). Curious about your forecasting features - do you have case studies in our industry?",enterprise,medium,partner_channel
+lea-te-0083,"Ben Murphy here from Sable Manufacturing in Seattle. We're ~12,000 people. Please send pricing for 44 seats; we're ready to sign if it fits.",enterprise,high,enterprise_ae
+lea-te-0084,Mateo Shah here from Pelican Insurance in Toronto. We're 900 staff. Signing up for the newsletter.,mid_market,low,nurture
+lea-te-0085,"We've used Lumen for 2 years at Brightwater Logistics (450 staff, London). Not looking to buy anything, just wanted to see the webinar recording.",mid_market,low,account_management
+lea-te-0086,"Web form - Name: Chen Reyes. Company: Fernhill Foods. Title: Chief Digital Officer. Location: Madrid. Size: about 85 employees. Message: Not looking to buy anything, just wanted to see the webinar recording.",smb,low,nurture
+lea-te-0087,"Hi, Grace Larsen from Nimbus Retail in Austin - we're already a Lumen customer (about 2,800 employees). Interested in the free template pack.",enterprise,low,account_management
+lea-te-0088,Mei Singh here from Sable Manufacturing in Amsterdam. We're about 85 employees. We're comparing a few analytics platforms. How does Lumen differ from Tableau?,smb,medium,self_serve
+lea-te-0089,Yara Shah here from Redwood Biotech in Singapore. We're 25 staff. Please send pricing for 113 seats; we're ready to sign if it fits.,smb,high,partner_channel
+lea-te-0090,Hi! I'm an MBA student in Toronto writing a paper on BI tools. Could I interview someone? We'd like a demo and pricing - budget is approved for this quarter.,unknown,low,disqualify
+lea-te-0091,"Hi, I'm Grace Rossi, Director of Finance at Tidewater Energy (a team of 60, based in Paris). We're comparing a few analytics platforms. How does Lumen differ from Tableau?",smb,medium,self_serve
+lea-te-0092,"Hi, I'm Aisha Mensah, Head of Data at Brightwater Logistics (~25,000 people, based in Chicago). Does Lumen integrate with Snowflake and Salesforce?",enterprise,medium,sdr
+lea-te-0093,"Web form - Name: Hannah Dubois. Company: Keystone Credit Union. Title: Analytics Manager. Location: Seattle. Size: ~6,500 people. Message: We're comparing a few analytics platforms. How does Lumen differ from Tableau?",enterprise,medium,sdr
+lea-te-0094,Web form - Name: Maria Rossi. Company: Brightwater Logistics. Title: VP of Operations. Location: Seoul. Size: a company of 120. Message: We'd like a demo and pricing - budget is approved for this quarter.,smb,high,partner_channel
+lea-te-0095,"Hi, I'm Mei Patel, Chief Digital Officer at Marlow Hotels (40 staff, based in Singapore). We're comparing a few analytics platforms. How does Lumen differ from Tableau?",smb,medium,partner_channel
+lea-te-0096,"Hannah Mensah here from Marlow Hotels in Seattle. We're about 60,000 employees. Does Lumen integrate with Snowflake and Salesforce?",enterprise,medium,sdr
+lea-te-0097,Camila Shah here from Harbor Pharma in Seattle. We're just 25 of us. Exploring options for next year's planning. What are typical implementation timelines?,smb,medium,self_serve
+lea-te-0098,"Hi, I'm Chen Haddad, COO at Atlas Freight (a team of 40, based in Toronto). Please send pricing for 260 seats; we're ready to sign if it fits.",smb,high,self_serve
+lea-te-0099,Hannah Murphy here from Pelican Insurance in Sydney. We're ~60 people. Please send pricing for 336 seats; we're ready to sign if it fits.,smb,high,partner_channel

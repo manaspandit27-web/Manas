@@ -1,0 +1,11 @@
+{
+  "title": "Lumen Analytics - Inbound Lead Qualification",
+  "company": "Lumen Analytics",
+  "function": "Marketing / Sales",
+  "task": "Read an inbound sales inquiry and qualify it: company segment, buying intent, and which sales motion should own it.",
+  "fields": {
+    "segment": "customer segment by company size",
+    "intent": "buying intent",
+    "route": "sales motion that owns the lead"
+  }
+}

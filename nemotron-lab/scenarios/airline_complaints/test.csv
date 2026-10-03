@@ -1,0 +1,101 @@
+id,input,category,priority,route_to,compensation
+air-te-0000,"A flight attendant on flight SK711 from Toronto to London mocked me in front of other passengers. My Skyward Miles tier is Platinum. Thanks, Hannah",staff_conduct,P1,customer_relations,none
+air-te-0001,"Dear Customer Care, The stroller we gate-checked on SK1048 (Miami to Phoenix) came back bent and unusable. I expect a response.",baggage,P3,baggage_services,none
+air-te-0002,"Hey, Your new boarding process is confusing. I saw it on SK2110 (Denver to Phoenix). Very disappointed.",other,P3,customer_care,none
+air-te-0003,"Hi Skyward, I got a text at 5am that flight SK171 from Atlanta to Newark was cancelled. No alternatives offered. Thanks, Grace",cancellation,P2,customer_care,voucher_250
+air-te-0004,"Dear Customer Care, I was promised a refund for SK1969 (Austin to Phoenix) 4 weeks ago. Still nothing. - Lily Novak",refund_request,P3,refunds,refund_review
+air-te-0005,"Hello, My my Phoenix-Miami flight, SK1680 was delayed by nine hours and nobody at the gate could tell us why. Very disappointed.",flight_delay,P2,customer_care,voucher_250
+air-te-0006,"Hey, The check-in staff for flight SK692 from Seattle to Mexico City refused to help and rolled their eyes at me. I have held Gold status with you for 5 years. Thanks, Arjun",staff_conduct,P1,customer_relations,none
+air-te-0007,"Hello, I'm a Skyward Gold member. I booked wheelchair assistance for my Dallas-London flight, SK579 and nobody showed up. I had to crawl down the jet bridge. Thanks, Elena",accessibility,P1,accessibility_desk,none
+air-te-0008,"You lost my luggage on flight SK2620 from Boston to Phoenix. All my work clothes are in it. As a Silver member of Skyward Miles, I expected better.",baggage,P3,baggage_services,none
+air-te-0009,"My Skyward Miles tier is Silver. I was promised a refund for my Atlanta-Phoenix flight, SK2503 4 weeks ago. Still nothing. Thanks, Rachel",refund_request,P3,refunds,refund_review
+air-te-0010,"Hey, I want my money back for flight SK530 from Austin to Mexico City. I paid for a seat I never got to use. - Nina Dubois",refund_request,P3,refunds,refund_review
+air-te-0011,"Cancelling my Toronto-Miami flight, SK1921 with no explanation left my family stranded in Toronto. Thanks, Tom",cancellation,P2,customer_care,voucher_250
+air-te-0012,"Hey, The wifi on flight SK2823 from Seattle to Phoenix didn't work at all even though I paid for it.",other,P3,customer_care,none
+air-te-0013,"To whom it may concern, Cancelling my Newark-Austin flight, SK971 with no explanation left my family stranded in Newark. (Gold member, by the way.)",cancellation,P2,customer_care,voucher_250
+air-te-0014,"Hey, I'm a Skyward Gold member. I got a text at 5am that SK600 (Orlando to Seattle) was cancelled. No alternatives offered.",cancellation,P2,customer_care,voucher_250
+air-te-0015,I'm a Skyward Silver member. A flight attendant on SK775 (London to Orlando) mocked me in front of other passengers. Please fix this.,staff_conduct,P1,customer_relations,none
+air-te-0016,"To whom it may concern, (Platinum member, by the way.) flight SK787 from Orlando to Austin was cancelled at the gate. I had to buy a ticket on another airline.",cancellation,P1,customer_care,voucher_250
+air-te-0017,"To whom it may concern, I got a text at 5am that flight SK1071 from Boston to Atlanta was cancelled. No alternatives offered.",cancellation,P2,customer_care,voucher_250
+air-te-0018,"To whom it may concern, I cancelled my ticket for flight SK2971 from Seattle to Chicago within 24 hours and still have not been refunded. Very disappointed.",refund_request,P3,refunds,refund_review
+air-te-0019,"Hi Skyward, I have held Platinum status with you for 7 years. Your new boarding process is confusing. I saw it on flight SK2719 from Boston to Newark. I expect a response.",other,P1,customer_care,none
+air-te-0020,The wifi on SK1203 (Seattle to Miami) didn't work at all even though I paid for it. I expect a response.,other,P3,customer_care,none
+air-te-0021,"I have held Platinum status with you for 7 years. The aisle chair I requested for SK912 (Phoenix to Boston) was never brought to the aircraft. Thanks, Samuel",accessibility,P1,accessibility_desk,none
+air-te-0022,"Dear Customer Care, My SK1157 (Seattle to Chicago) was delayed by three hours and nobody at the gate could tell us why. As a Gold member of Skyward Miles, I expected better. What are you going to do about it?",flight_delay,P2,customer_care,voucher_100
+air-te-0023,"Hello, The food on SK938 (Mexico City to Phoenix) was cold and the seat-back screen was broken. I'm a Skyward Platinum member. I expect a response.",other,P1,customer_care,none
+air-te-0024,"Dear Customer Care, The check-in staff for flight SK539 from Miami to London refused to help and rolled their eyes at me. (Silver member, by the way.)",staff_conduct,P1,customer_relations,none
+air-te-0025,"Hey, I'd like to add my daughter to my reservation on flight SK721 from Orlando to Denver. Thanks, Rachel",booking_change,P3,customer_care,none
+air-te-0026,"Hello, The stroller we gate-checked on SK983 (Seattle to Orlando) came back bent and unusable. I expect a response.",baggage,P3,baggage_services,none
+air-te-0027,"Dear Customer Care, We sat at the gate for seven hours waiting for flight SK273 from Mexico City to Austin. Zero updates. Please fix this.",flight_delay,P2,customer_care,voucher_250
+air-te-0028,"Can I switch SK1896 (Phoenix to Boston) to an earlier departure? I can't find the option online. (Gold member, by the way.) Very disappointed.",booking_change,P2,customer_care,none
+air-te-0029,"Hi Skyward, The food on flight SK1634 from Miami to Dallas was cold and the seat-back screen was broken. Very disappointed.",other,P3,customer_care,none
+air-te-0030,"(Gold member, by the way.) You cancelled flight SK2154 from Miami to Orlando the night before and rebooked me two days later. What are you going to do about it?",cancellation,P2,customer_care,voucher_250
+air-te-0031,"Hey, My SK638 (Toronto to Denver) was delayed by two hours and nobody at the gate could tell us why. Thanks, Rachel",flight_delay,P3,customer_care,none
+air-te-0032,"Hello, SK1208 (Seattle to Boston) left 4 hours late. I missed a client dinner because of it. Very disappointed.",flight_delay,P2,customer_care,voucher_100
+air-te-0033,The food on SK2063 (Denver to Chicago) was cold and the seat-back screen was broken.,other,P3,customer_care,none
+air-te-0034,"Hey, As a Gold member of Skyward Miles, I expected better. I was promised a refund for SK2152 (Newark to Chicago) 8 weeks ago. Still nothing. I expect a response.",refund_request,P2,refunds,refund_review
+air-te-0035,"A flight attendant on my London-Mexico City flight, SK2444 mocked me in front of other passengers.",staff_conduct,P1,customer_relations,none
+air-te-0036,"Hello, Your app kept pushing back SK629 (Mexico City to Austin) until it finally departed 7 hours behind schedule.",flight_delay,P2,customer_care,voucher_250
+air-te-0037,"Dear Customer Care, I'd like to add my daughter to my reservation on SK2367 (Atlanta to Toronto). I'm a Skyward Gold member. Please fix this.",booking_change,P2,customer_care,none
+air-te-0038,"Hello, As a Gold member of Skyward Miles, I expected better. I got a text at 5am that flight SK230 from Miami to Chicago was cancelled. No alternatives offered. What are you going to do about it?",cancellation,P2,customer_care,voucher_250
+air-te-0039,"Dear Customer Care, I was treated with real hostility by a crew member on flight SK415 from Orlando to Mexico City.",staff_conduct,P1,customer_relations,none
+air-te-0040,"Hey, Your new boarding process is confusing. I saw it on flight SK1433 from London to Chicago. What are you going to do about it?",other,P3,customer_care,none
+air-te-0041,"Hello, The food on my Orlando-Denver flight, SK233 was cold and the seat-back screen was broken. Thanks, Lily",other,P3,customer_care,none
+air-te-0042,"Hi Skyward, Please refund the $89 seat upgrade on flight SK1238 from Miami to Seattle that I was charged twice for. Please fix this.",refund_request,P3,refunds,refund_review
+air-te-0043,"Hey, My checked bag never arrived after flight SK1423 from Atlanta to Austin. It has been six days. I expect a response.",baggage,P3,baggage_services,none
+air-te-0044,"Dear Customer Care, My checked bag never arrived after my Toronto-Chicago flight, SK2956. It has been four days.",baggage,P3,baggage_services,none
+air-te-0045,"Hi Skyward, I am deaf and no one told me the gate for flight SK1702 from Dallas to Toronto had changed. I nearly missed it. I expect a response.",accessibility,P1,accessibility_desk,none
+air-te-0046,"Dear Customer Care, I got a text at 5am that my Boston-Dallas flight, SK816 was cancelled. No alternatives offered. What are you going to do about it?",cancellation,P2,customer_care,voucher_250
+air-te-0047,I have held Silver status with you for 6 years. SK510 (Dallas to Boston) left 2 hours late. I missed a client dinner because of it. Very disappointed.,flight_delay,P3,customer_care,none
+air-te-0048,"To whom it may concern, The wifi on my London-Newark flight, SK2156 didn't work at all even though I paid for it. Very disappointed.",other,P3,customer_care,none
+air-te-0049,"Can I switch SK2666 (Phoenix to Dallas) to an earlier departure? I can't find the option online. My Skyward Miles tier is Platinum. Thanks, Chen",booking_change,P1,customer_care,none
+air-te-0050,"Hello, I was treated with real hostility by a crew member on SK2887 (Phoenix to Chicago). - Sofia Brooks",staff_conduct,P1,customer_relations,none
+air-te-0051,The cabin on SK2452 (Mexico City to Newark) was filthy. Crumbs everywhere and a sticky tray table. Please fix this.,other,P3,customer_care,none
+air-te-0052,"Hello, My service dog was refused boarding on my London-Seattle flight, SK214 even though I had all the paperwork.",accessibility,P1,accessibility_desk,none
+air-te-0053,A 2-hour delay on flight SK2605 from Seattle to Phoenix is unacceptable. My whole day was ruined. I have held Silver status with you for 6 years. I expect a response.,flight_delay,P3,customer_care,none
+air-te-0054,I need to move SK337 (Dallas to Boston) to the following Tuesday. The website keeps erroring out.,booking_change,P3,customer_care,none
+air-te-0055,"A 1-hour delay on my London-Phoenix flight, SK1773 is unacceptable. My whole day was ruined.",flight_delay,P3,customer_care,none
+air-te-0056,"Hello, I want my money back for SK313 (Dallas to Orlando). I paid for a seat I never got to use. I'm a Skyward Silver member. - Olu Brooks",refund_request,P3,refunds,refund_review
+air-te-0057,"Cancelling my Denver-Mexico City flight, SK1922 with no explanation left my family stranded in Denver. Thanks, Hannah",cancellation,P2,customer_care,voucher_250
+air-te-0058,"Hello, You cancelled SK470 (Newark to Chicago) the night before and rebooked me two days later. As a Silver member of Skyward Miles, I expected better. Please fix this.",cancellation,P2,customer_care,voucher_250
+air-te-0059,"Dear Customer Care, You cancelled flight SK893 from Chicago to Miami the night before and rebooked me two days later. Very disappointed.",cancellation,P2,customer_care,voucher_250
+air-te-0060,I'm a Skyward Gold member. The stroller we gate-checked on SK1549 (Toronto to Dallas) came back bent and unusable.,baggage,P2,baggage_services,none
+air-te-0061,"Your app kept pushing back my Dallas-Phoenix flight, SK2469 until it finally departed 9 hours behind schedule. Thanks, Maria",flight_delay,P2,customer_care,voucher_250
+air-te-0062,"Hi Skyward, My SK968 (Chicago to Phoenix) was delayed by 8 hours and nobody at the gate could tell us why. Very disappointed.",flight_delay,P2,customer_care,voucher_250
+air-te-0063,A 4-hour delay on SK400 (Toronto to Atlanta) is unacceptable. My whole day was ruined. I have held Gold status with you for nine years. - Mei Patel,flight_delay,P2,customer_care,voucher_100
+air-te-0064,"Hi Skyward, You cancelled flight SK198 from Toronto to London the night before and rebooked me two days later. What are you going to do about it?",cancellation,P2,customer_care,voucher_250
+air-te-0065,My checked bag never arrived after flight SK298 from London to Austin. It has been 5 days. I'm a Skyward Silver member. Very disappointed.,baggage,P3,baggage_services,none
+air-te-0066,"Hi Skyward, My Skyward Miles tier is Silver. My checked bag never arrived after flight SK1597 from Seattle to Orlando. It has been 2 days. Thanks, Mateo",baggage,P3,baggage_services,none
+air-te-0067,"Hi Skyward, Cancelling my Phoenix-Boston flight, SK2588 with no explanation left my family stranded in Phoenix. Very disappointed.",cancellation,P2,customer_care,voucher_250
+air-te-0068,"To whom it may concern, As a Gold member of Skyward Miles, I expected better. I am deaf and no one told me the gate for flight SK1070 from Boston to Atlanta had changed. I nearly missed it. Thanks, Samuel",accessibility,P1,accessibility_desk,none
+air-te-0069,"My checked bag never arrived after my Denver-London flight, SK1226. It has been six days. Please fix this.",baggage,P3,baggage_services,none
+air-te-0070,Cancelling SK1828 (Mexico City to Orlando) with no explanation left my family stranded in Mexico City. What are you going to do about it?,cancellation,P2,customer_care,voucher_250
+air-te-0071,"Hello, My Skyward Miles tier is Gold. My checked bag never arrived after my Boston-Dallas flight, SK2969. It has been 4 days.",baggage,P2,baggage_services,none
+air-te-0072,You lost my luggage on SK112 (Denver to London). All my work clothes are in it. My Skyward Miles tier is Gold. I expect a response.,baggage,P2,baggage_services,none
+air-te-0073,"Dear Customer Care, (Gold member, by the way.) Your app kept pushing back SK2213 (Mexico City to Boston) until it finally departed 8 hours behind schedule.",flight_delay,P2,customer_care,voucher_250
+air-te-0074,The food on SK2075 (Phoenix to Orlando) was cold and the seat-back screen was broken. Very disappointed.,other,P3,customer_care,none
+air-te-0075,"To whom it may concern, SK1629 (London to Miami) was cancelled at the gate. I had to buy a ticket on another airline. I'm a Skyward Platinum member. Please fix this.",cancellation,P1,customer_care,voucher_250
+air-te-0076,My suitcase came off flight SK2301 from Miami to London with a broken handle and a cracked shell.,baggage,P3,baggage_services,none
+air-te-0077,"To whom it may concern, You lost my luggage on my Toronto-Newark flight, SK748. All my work clothes are in it.",baggage,P3,baggage_services,none
+air-te-0078,The aisle chair I requested for flight SK130 from London to Denver was never brought to the aircraft. Very disappointed.,accessibility,P1,accessibility_desk,none
+air-te-0079,"Hi Skyward, The food on flight SK1449 from Chicago to Atlanta was cold and the seat-back screen was broken.",other,P3,customer_care,none
+air-te-0080,"To whom it may concern, A flight attendant on my Atlanta-Toronto flight, SK2033 mocked me in front of other passengers. Thanks, Zara",staff_conduct,P1,customer_relations,none
+air-te-0081,A 4-hour delay on flight SK158 from Denver to Phoenix is unacceptable. My whole day was ruined. I have held Silver status with you for 9 years. I expect a response.,flight_delay,P2,customer_care,voucher_100
+air-te-0082,"SK2067 (Mexico City to Boston) left 7 hours late. I missed a client dinner because of it. Thanks, Fatima",flight_delay,P2,customer_care,voucher_250
+air-te-0083,"Dear Customer Care, My Skyward Miles tier is Gold. The check-in staff for my Dallas-Newark flight, SK2136 refused to help and rolled their eyes at me. I expect a response.",staff_conduct,P1,customer_relations,none
+air-te-0084,"I got a text at 5am that my Toronto-Orlando flight, SK2483 was cancelled. No alternatives offered. As a Gold member of Skyward Miles, I expected better. What are you going to do about it?",cancellation,P2,customer_care,voucher_250
+air-te-0085,"To whom it may concern, My suitcase came off my Boston-Toronto flight, SK520 with a broken handle and a cracked shell.",baggage,P3,baggage_services,none
+air-te-0086,"As a Platinum member of Skyward Miles, I expected better. flight SK568 from Chicago to Mexico City left 5 hours late. I missed a client dinner because of it. - Zara Reyes",flight_delay,P1,customer_care,voucher_100
+air-te-0087,"Dear Customer Care, I was treated with real hostility by a crew member on SK1530 (Denver to London). Very disappointed.",staff_conduct,P1,customer_relations,none
+air-te-0088,"Hello, The stroller we gate-checked on SK1994 (Miami to Phoenix) came back bent and unusable. My Skyward Miles tier is Silver. - Ben Mensah",baggage,P3,baggage_services,none
+air-te-0089,"To whom it may concern, my Atlanta-Boston flight, SK1902 was cancelled at the gate. I had to buy a ticket on another airline. (Gold member, by the way.)",cancellation,P2,customer_care,voucher_250
+air-te-0090,My suitcase came off SK2437 (Austin to Newark) with a broken handle and a cracked shell. My Skyward Miles tier is Gold.,baggage,P2,baggage_services,none
+air-te-0091,"To whom it may concern, We sat at the gate for 8 hours waiting for SK159 (Phoenix to Denver). Zero updates. What are you going to do about it?",flight_delay,P2,customer_care,voucher_250
+air-te-0092,"To whom it may concern, We sat at the gate for 1 hours waiting for SK548 (Chicago to Seattle). Zero updates. Please fix this.",flight_delay,P3,customer_care,none
+air-te-0093,"To whom it may concern, My Skyward Miles tier is Gold. How do I change the name on my booking for flight SK2864 from London to Denver? My ticket has a typo. Very disappointed.",booking_change,P2,customer_care,none
+air-te-0094,"Hey, We sat at the gate for 6 hours waiting for my Boston-Toronto flight, SK2460. Zero updates. I have held Silver status with you for 9 years. Very disappointed.",flight_delay,P2,customer_care,voucher_250
+air-te-0095,"Dear Customer Care, Your new boarding process is confusing. I saw it on my Miami-Denver flight, SK2922. Very disappointed.",other,P3,customer_care,none
+air-te-0096,"To whom it may concern, Please refund the $89 seat upgrade on SK742 (Denver to Orlando) that I was charged twice for. Thanks, Lily",refund_request,P3,refunds,refund_review
+air-te-0097,"I booked wheelchair assistance for my Toronto-Mexico City flight, SK1711 and nobody showed up. I had to crawl down the jet bridge. Please fix this.",accessibility,P1,accessibility_desk,none
+air-te-0098,"Dear Customer Care, (Silver member, by the way.) The check-in staff for SK2977 (Boston to Atlanta) refused to help and rolled their eyes at me.",staff_conduct,P1,customer_relations,none
+air-te-0099,"Hello, Can I switch flight SK2649 from Phoenix to Dallas to an earlier departure? I can't find the option online. I expect a response.",booking_change,P3,customer_care,none

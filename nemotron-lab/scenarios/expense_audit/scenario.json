@@ -1,0 +1,11 @@
+{
+  "title": "Meridian Advisory - Expense Report Audit",
+  "company": "Meridian Advisory",
+  "function": "Finance / Compliance",
+  "task": "Read one expense report line from a consultant and decide whether it complies with the travel and expense policy.",
+  "fields": {
+    "expense_type": "expense category",
+    "decision": "audit decision",
+    "reason": "reason code for the decision"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "title": "Harvest Table Restaurant Group - Accounts Payable Intake",
+  "company": "Harvest Table Restaurant Group",
+  "function": "Finance / Accounting",
+  "task": "Read a vendor invoice email and extract the vendor, invoice number and amount, assign the general-ledger code, and decide the approval path.",
+  "fields": {
+    "vendor": "vendor company name",
+    "invoice_number": "invoice number exactly as written",
+    "amount_usd": "invoice total as a plain number with 2 decimals, e.g. 1234.50",
+    "gl_code": "general-ledger account code",
+    "approval": "approval path"
+  }
+}

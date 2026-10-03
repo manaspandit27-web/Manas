@@ -1,0 +1,12 @@
+{
+  "title": "Granite Shield Insurance - Auto Claims First Notice of Loss",
+  "company": "Granite Shield Insurance",
+  "function": "Risk / Insurance Operations",
+  "task": "Read a first-notice-of-loss report for an auto claim and classify the claim type, whether anyone was injured, the damage band, and where to route it.",
+  "fields": {
+    "claim_type": "type of loss",
+    "injury": "was anyone injured",
+    "estimate_band": "estimated damage",
+    "route": "handling queue"
+  }
+}

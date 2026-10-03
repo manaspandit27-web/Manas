@@ -1,0 +1,12 @@
+{
+  "title": "Skyward Airways - Customer Complaint Triage",
+  "company": "Skyward Airways",
+  "function": "Operations / Customer Service",
+  "task": "Read a customer complaint and triage it: category, priority, which team it goes to, and what compensation policy applies.",
+  "fields": {
+    "category": "what the complaint is about",
+    "priority": "P1 (urgent) to P3 (routine)",
+    "route_to": "team that owns the case",
+    "compensation": "compensation the policy allows"
+  }
+}

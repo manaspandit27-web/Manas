@@ -1,0 +1,101 @@
+id,input,expense_type,decision,reason
+exp-te-0000,"Arjun Cohen: Bought flip charts and markers for a workshop for the project team, $42.17. Receipt uploaded.",office_supplies,approve,within_policy
+exp-te-0001,Rachel Tanaka: Business meal with the Acme Corp team (2 people incl. me) at Oleana - $128.47. Lost the receipt.,meals,needs_receipt,missing_receipt
+exp-te-0002,"Expense line - Team dinner at a sushi place near the office in Chicago, 3 of us from the team, total $68.94. Lost the receipt.",meals,needs_receipt,missing_receipt
+exp-te-0003,"Noah Ali: Hampton Inn Boston, 5 nights at $345/night, total $1,725. Receipt attached.",lodging,approve,within_policy
+exp-te-0004,"Expense line - Client dinner with Halcyon Energy at the airport Chili's, San Francisco. 4 attendees total. $191.96. (receipt attached)",meals,approve,within_policy
+exp-te-0005,"Bought printer toner and paper for the project team, $78.02. (receipt attached)",office_supplies,approve,within_policy
+exp-te-0006,Expense line - Lyft to New York office - $17.24. (receipt attached),ground_transport,approve,within_policy
+exp-te-0007,"Client dinner with Vantage Retail at a sushi place near the office, Charlotte. Two attendees total. $126.21. Receipt uploaded.",meals,approve,within_policy
+exp-te-0008,Business meal with the Orbit Bank team (4 people incl. me) at a sushi place near the office - $258.96. Receipt uploaded.,meals,approve,within_policy
+exp-te-0009,"Ben Wang: Hotel minibar and in-room movie, San Francisco, $232.56. Receipt uploaded.",entertainment,reject,non_reimbursable
+exp-te-0010,"Rachel Garcia: Flight to Denver for client kickoff, premium economy class, 2-hour flight, $2,303. Receipt uploaded.",airfare,approve,within_policy
+exp-te-0011,Business meal with the Vantage Retail team (3 people incl. me) at the hotel restaurant - $166.20. (receipt attached),meals,approve,within_policy
+exp-te-0012,"Mei Shah: Taxi from the airport to the client site in London, $113.18. (receipt attached)",ground_transport,approve,within_policy
+exp-te-0013,"Dev Shah: Hotel for the Minneapolis engagement: Marriott, $209 per night x 1. Receipt uploaded.",lodging,approve,within_policy
+exp-te-0014,"Bought flip charts and markers for a workshop for the project team, $413.95. No receipt - the restaurant's printer was down. Submitted by Omar Kim.",office_supplies,needs_receipt,missing_receipt
+exp-te-0015,"Client dinner with Vantage Retail at the airport Chili's, Dallas. 3 attendees total. $292.89. (receipt attached)",meals,approve,within_policy
+exp-te-0016,"Client dinner with Orbit Bank at the hotel restaurant, Atlanta. 2 attendees total. $52.30. (receipt attached)",meals,approve,within_policy
+exp-te-0017,Business meal with the Halcyon Energy team (3 people incl. me) at Capital Grille - $267.18. Receipt uploaded. Submitted by Arjun Patel.,meals,approve,within_policy
+exp-te-0018,"Dinner at a sushi place near the office in Chicago, just me, $57.83. (receipt attached)",meals,approve,within_policy
+exp-te-0019,"Expense line - Netflix subscription while traveling, Dallas, $231.61. (receipt attached)",entertainment,reject,non_reimbursable
+exp-te-0020,Olu Cohen: Business meal with the Vantage Retail team (4 people incl. me) at the airport Chili's - $960.94. (receipt attached),meals,needs_manager,over_limit
+exp-te-0021,"Expense line - Team dinner at the airport Chili's in Columbus, two of us from the team, total $66.04. Receipt uploaded.",meals,approve,within_policy
+exp-te-0022,"Kenji Wang: Uber from the airport to the client site in Charlotte, $218.31. Receipt uploaded.",ground_transport,needs_manager,over_limit
+exp-te-0023,"Westin London, one night at $287/night, total $287. (receipt attached)",lodging,approve,within_policy
+exp-te-0024,"Lily Novak: Hilton Garden Inn San Francisco, three nights at $292/night, total $876. Receipt uploaded.",lodging,approve,within_policy
+exp-te-0025,"Flight to Charlotte for client kickoff, business class, 3-hour flight, $5,409. Receipt uploaded.",airfare,reject,class_of_service
+exp-te-0026,"Expense line - Airfare: business seat, 2 hrs flight time, $4,986 round trip to Frankfurt. I don't have a receipt for this one.",airfare,reject,class_of_service
+exp-te-0027,"Airfare: economy seat, 8 hrs flight time, $267 round trip to San Francisco. Receipt attached.",airfare,approve,within_policy
+exp-te-0028,Yara Larsen: Lyft to Atlanta office - $61.98. (receipt attached),ground_transport,approve,within_policy
+exp-te-0029,"Gym day pass, Atlanta, $219.97. (receipt attached)",entertainment,reject,non_reimbursable
+exp-te-0030,"Flight to Boston for client kickoff, economy class, 11-hour flight, $442. Receipt uploaded. Submitted by Kenji Novak.",airfare,approve,within_policy
+exp-te-0031,"Tom Mensah: Hotel for the Boston engagement: Westin, $376 per night x 2. Receipt attached.",lodging,approve,within_policy
+exp-te-0032,"Team dinner at a sushi place near the office in London, two of us from the team, total $107.62. Receipt attached. Submitted by Nina Brooks.",meals,approve,within_policy
+exp-te-0033,Business meal with the Acme Corp team (4 people incl. me) at an Italian spot downtown - $753.42. Receipt uploaded.,meals,needs_manager,over_limit
+exp-te-0034,"Expense line - Bought a portable monitor for the project team, $99.13. (receipt attached)",office_supplies,approve,within_policy
+exp-te-0035,"Expense line - Westin Phoenix, 4 nights at $153/night, total $612. Receipt attached.",lodging,approve,within_policy
+exp-te-0036,"Team dinner at the hotel restaurant in Chicago, four of us from the team, total $218.20. Receipt uploaded. Submitted by Rachel Mensah.",meals,approve,within_policy
+exp-te-0037,"Four Seasons Dallas, 5 nights at $216/night, total $1,080. Receipt attached. Submitted by Ben Ali.",lodging,approve,within_policy
+exp-te-0038,"Airfare: premium economy seat, 11 hrs flight time, $1,935 round trip to Dallas. Receipt uploaded.",airfare,approve,within_policy
+exp-te-0039,"Arjun Dubois: Team dinner at Capital Grille in Chicago, 4 of us from the team, total $65.76. Lost the receipt.",meals,needs_receipt,missing_receipt
+exp-te-0040,"Hampton Inn Atlanta, three nights at $422/night, total $1,266. Receipt uploaded.",lodging,needs_manager,over_limit
+exp-te-0041,Business meal with the Halcyon Energy team (6 people incl. me) at Oleana - $380.84. Receipt uploaded.,meals,approve,within_policy
+exp-te-0042,"Team dinner at Capital Grille in London, three of us from the team, total $456.51. Receipt uploaded. Submitted by Omar Silva.",meals,needs_manager,over_limit
+exp-te-0043,"Airfare: economy seat, 4 hrs flight time, $357 round trip to Tokyo. (receipt attached) Submitted by Yara Brooks.",airfare,approve,within_policy
+exp-te-0044,Business meal with the Vantage Retail team (2 people incl. me) at Oleana - $427.22. Receipt to follow.,meals,needs_receipt,missing_receipt
+exp-te-0045,"Bought notebooks and sticky notes for the project team, $125.30. Receipt uploaded. Submitted by Dev Dubois.",office_supplies,approve,within_policy
+exp-te-0046,Expense line - Lyft to Phoenix office - $206.76. Lost the receipt.,ground_transport,needs_receipt,missing_receipt
+exp-te-0047,"Arjun Reyes: Lyft from the airport to the client site in San Francisco, $86.43. (receipt attached)",ground_transport,approve,within_policy
+exp-te-0048,"Gym day pass, London, $213.64. (receipt attached) Submitted by Olu Dubois.",entertainment,reject,non_reimbursable
+exp-te-0049,Expense line - Car service to Denver office - $271.02. (receipt attached),ground_transport,needs_manager,over_limit
+exp-te-0050,"Airfare: economy seat, 8 hrs flight time, $639 round trip to Phoenix. I don't have a receipt for this one. Submitted by Kenji Kim.",airfare,needs_receipt,missing_receipt
+exp-te-0051,"Expense line - Team dinner at a sushi place near the office in Dallas, 2 of us from the team, total $55.81. (receipt attached)",meals,approve,within_policy
+exp-te-0052,"Flight to Atlanta for client kickoff, economy class, 2-hour flight, $640. Receipt uploaded. Submitted by Ben Silva.",airfare,approve,within_policy
+exp-te-0053,Business meal with the Northbridge Health team (4 people incl. me) at Oleana - $955.26. Receipt uploaded. Submitted by Tom Tanaka.,meals,needs_manager,over_limit
+exp-te-0054,"Airfare: economy seat, 5 hrs flight time, $337 round trip to Chicago. No receipt - the restaurant's printer was down. Submitted by Diego Larsen.",airfare,needs_receipt,missing_receipt
+exp-te-0055,"Bought a USB-C dock for the project team, $461.07. I don't have a receipt for this one.",office_supplies,needs_receipt,missing_receipt
+exp-te-0056,"Priya Dubois: Airfare: business seat, 5 hrs flight time, $1,834 round trip to Charlotte. I don't have a receipt for this one.",airfare,reject,class_of_service
+exp-te-0057,"Team dinner at Oleana in Minneapolis, 3 of us from the team, total $110.24. Receipt attached. Submitted by Samuel Wang.",meals,approve,within_policy
+exp-te-0058,Uber to Charlotte office - $280.24. (receipt attached) Submitted by Noah Garcia.,ground_transport,needs_manager,over_limit
+exp-te-0059,"Hyatt Regency Minneapolis, 1 night at $432/night, total $432. I don't have a receipt for this one. Submitted by Olu Brooks.",lodging,needs_receipt,missing_receipt
+exp-te-0060,"Flight to Dallas for client kickoff, economy class, eleven-hour flight, $855. (receipt attached)",airfare,approve,within_policy
+exp-te-0061,"Bought notebooks and sticky notes for the project team, $74.76. Lost the receipt. Submitted by Yara Rossi.",office_supplies,needs_receipt,missing_receipt
+exp-te-0062,"Expense line - Airfare: economy seat, 5 hrs flight time, $720 round trip to Frankfurt. Lost the receipt.",airfare,needs_receipt,missing_receipt
+exp-te-0063,"Expense line - Celtics tickets for me and my partner, San Francisco, $120.51. Receipt uploaded.",entertainment,reject,non_reimbursable
+exp-te-0064,"Nina Haddad: Dinner at Capital Grille in Boston, just me, $118.47. Receipt attached.",meals,needs_manager,over_limit
+exp-te-0065,"Expense line - Bought notebooks and sticky notes for the project team, $260.84. I don't have a receipt for this one.",office_supplies,needs_receipt,missing_receipt
+exp-te-0066,"Car service from the airport to the client site in Boston, $232.64. Receipt attached. Submitted by Tom Novak.",ground_transport,needs_manager,over_limit
+exp-te-0067,"Hotel for the Minneapolis engagement: Hyatt Regency, $388 per night x 5. (receipt attached) Submitted by Zara Patel.",lodging,needs_manager,over_limit
+exp-te-0068,"Car service from the airport to the client site in Minneapolis, $305.60. Receipt attached. Submitted by Nina Shah.",ground_transport,needs_manager,over_limit
+exp-te-0069,Taxi to Atlanta office - $32.99. (receipt attached),ground_transport,approve,within_policy
+exp-te-0070,"Dinner at Oleana in Charlotte, just me, $23.72. Receipt uploaded.",meals,approve,within_policy
+exp-te-0071,"Yara Tanaka: Hotel for the Dallas engagement: Four Seasons, $381 per night x 2. (receipt attached)",lodging,needs_manager,over_limit
+exp-te-0072,"Team dinner at an Italian spot downtown in Boston, 3 of us from the team, total $156.54. Receipt attached. Submitted by Luca Mensah.",meals,approve,within_policy
+exp-te-0073,"Bought a USB-C dock for the project team, $310.62. Receipt uploaded.",office_supplies,needs_manager,over_limit
+exp-te-0074,"Expense line - Flight to Minneapolis for client kickoff, economy class, two-hour flight, $448. Receipt uploaded.",airfare,approve,within_policy
+exp-te-0075,"Dinner at the airport Chili's in Chicago, just me, $54.16. Receipt uploaded. Submitted by Ibrahim Tanaka.",meals,approve,within_policy
+exp-te-0076,"Chen Kim: Team dinner at the airport Chili's in Charlotte, two of us from the team, total $80.07. Receipt attached.",meals,approve,within_policy
+exp-te-0077,Taxi to London office - $28.51. No receipt - the restaurant's printer was down.,ground_transport,needs_receipt,missing_receipt
+exp-te-0078,"Bought a portable monitor for the project team, $132.53. I don't have a receipt for this one.",office_supplies,needs_receipt,missing_receipt
+exp-te-0079,"Tom Rossi: Four Seasons London, 5 nights at $374/night, total $1,870. (receipt attached)",lodging,approve,within_policy
+exp-te-0080,"Airfare: business seat, 2 hrs flight time, $3,551 round trip to Singapore. (receipt attached) Submitted by Ibrahim Kim.",airfare,reject,class_of_service
+exp-te-0081,"Business meal with the Vantage Retail team (5 people incl. me) at Capital Grille - $1,353.55. Receipt uploaded.",meals,needs_manager,over_limit
+exp-te-0082,"Hotel for the Minneapolis engagement: Four Seasons, $195 per night x 2. (receipt attached) Submitted by Grace Kim.",lodging,approve,within_policy
+exp-te-0083,"Hotel for the Minneapolis engagement: Marriott, $430 per night x 3. (receipt attached)",lodging,needs_manager,over_limit
+exp-te-0084,"Kenji Kim: Bought printer toner and paper for the project team, $164.99. Receipt attached.",office_supplies,approve,within_policy
+exp-te-0085,"Hotel for the Minneapolis engagement: Hilton Garden Inn, $185 per night x 3. (receipt attached) Submitted by Priya Wang.",lodging,approve,within_policy
+exp-te-0086,"Team dinner at Shake Shack in Denver, 4 of us from the team, total $150.92. Receipt to follow. Submitted by Yara Dubois.",meals,needs_receipt,missing_receipt
+exp-te-0087,"Team dinner at a sushi place near the office in New York, four of us from the team, total $85.67. Receipt uploaded. Submitted by Camila Shah.",meals,approve,within_policy
+exp-te-0088,"Hotel for the Boston engagement: Hampton Inn, $320 per night x 1. Receipt attached.",lodging,approve,within_policy
+exp-te-0089,"Flight to Dallas for client kickoff, economy class, 1-hour flight, $216. Receipt attached. Submitted by Noah Okafor.",airfare,approve,within_policy
+exp-te-0090,"Expense line - Client dinner with Vantage Retail at a sushi place near the office, Minneapolis. 3 attendees total. $202.15. Receipt uploaded.",meals,approve,within_policy
+exp-te-0091,"Airfare: economy seat, 5 hrs flight time, $669 round trip to Tokyo. No receipt - the restaurant's printer was down.",airfare,needs_receipt,missing_receipt
+exp-te-0092,"Dinner at a sushi place near the office in San Francisco, just me, $97.69. Receipt attached. Submitted by Lily Tanaka.",meals,needs_manager,over_limit
+exp-te-0093,"Flight to Tokyo for client kickoff, business class, eleven-hour flight, $2,319. Receipt attached.",airfare,approve,within_policy
+exp-te-0094,Expense line - Business meal with the Orbit Bank team (5 people incl. me) at Capital Grille - $313.62. Receipt attached.,meals,approve,within_policy
+exp-te-0095,"Olu Brooks: Team dinner at a sushi place near the office in Columbus, 4 of us from the team, total $441.67. I don't have a receipt for this one.",meals,needs_receipt,missing_receipt
+exp-te-0096,"Mateo Cohen: Bought a portable monitor for the project team, $148.47. (receipt attached)",office_supplies,approve,within_policy
+exp-te-0097,"Expense line - Flight to Boston for client kickoff, economy class, 5-hour flight, $819. Receipt attached.",airfare,approve,within_policy
+exp-te-0098,"Hannah Silva: Hotel for the New York engagement: Hampton Inn, $205 per night x 5. Lost the receipt.",lodging,needs_receipt,missing_receipt
+exp-te-0099,"Airfare: economy seat, 5 hrs flight time, $231 round trip to Singapore. (receipt attached) Submitted by Diego Silva.",airfare,approve,within_policy
