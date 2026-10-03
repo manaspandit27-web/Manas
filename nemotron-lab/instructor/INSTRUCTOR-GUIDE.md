@@ -17,29 +17,30 @@ The timings are a suggestion and have not been rehearsed with a class.
 | **0:00–0:10** | Framing (instructor) | "How do you bring your data to the model?" Prompt vs RAG vs fine-tune (pre-read §2), open vs closed weights (§4), the Bridgewater × Thinking Machines result (§5). |
 | **0:10–0:18** | Ask the original model | On the projector, open the chat ([`notebooks/projector_demo.ipynb`](../notebooks/projector_demo.ipynb)). The chat opens with the instruction the model is given. Ask it three to five messages from the case. Before each answer, ask the class what the company's rules say the answer should be. |
 | **0:18–0:30** | Students label | Hand out the company's rules and the examples to label (see below). Students fill in the labels and send them back. |
-| **0:30–0:42** | Fine-tune on screen | In the chat, press **Fine-tune**, add the labelled file or files, and press **Start**. A progress bar and the training loss show on screen. It takes about 9 to 13 minutes for 100 examples on a T4, so use the time for debrief questions 2 and 3. |
-| **0:42–0:50** | Switch and ask again | Switch the top bar from *Original* to *Fine-tuned*, then press **Ask the same questions again**. Compare the new answers with the earlier ones, and with the rules. |
+| **0:30–0:42** | Fine-tune on screen | Switch the projector to the Colab notebook. Run the cell that loads the students' file, then the fine-tuning cell. The class sees the code and its progress. It takes about 9 to 13 minutes for 100 examples on a T4, so use the time for debrief questions 2 and 3. |
+| **0:42–0:50** | Switch and ask again | Run the notebook's last cell, `chat.serve("fine-tuned")`. Go back to the chat and press **Ask the same questions again**. Compare the new answers with the earlier ones, and with the rules. |
 | **0:50–1:00** | Debrief and wrap | The remaining questions below, then the takeaway. |
 
 ## How the class labels examples
 
-1. **Pick one company** in the chat's top bar before class. The dry run below shows that 100 examples are enough for four of the five; `invoice_intake` needs about 300, so avoid it.
-2. **Get the examples.** In the chat, press **Fine-tune** and download the 100 examples to label. It is a CSV with the messages and one empty column per answer field.
-3. **Share them.** The simplest way is one Google Sheet made from that file, with the rows divided among students or teams. Give students the company's rules: `scenarios/<name>/policy.md`, and the one-page case in `case.md`.
-4. **Collect them.** Download the sheet as CSV (or collect one file per student) and add it in the **Fine-tune** box. The box shows how many labelled examples it read and how many rows it skipped.
+1. **Pick one company** and set it as `SCENARIO` in the notebook. The dry run below shows that 100 examples are enough for four of the five; `invoice_intake` needs about 300, so avoid it.
+2. **Hand out the examples file:** `scenarios/<name>/examples_to_label.csv`. It has 100 messages and one empty column per answer field. The simplest way is to put it in one Google Sheet and divide the rows among students or teams.
+3. **Give students the company's rules:** `scenarios/<name>/policy.md`, and the one-page case in `case.md`.
+4. **Get it back as CSV.** From a Google Sheet: File → Download → CSV.
+5. **Load it in the notebook.** The cell under *Fine-tune on the class's labels* asks for the file and prints how many labelled examples it read and how many rows it skipped.
 
 **About the labelled files**
 
-- Each file needs the `input` column (or the `id` column from the examples file) and one column per answer field.
-- Several files can be added at once. When two students labelled the same message, the more common label is used.
+- Each file needs the `input` column (or the `id` column) and one column per answer field, as in the examples file.
+- Several files can be loaded at once. When two students labelled the same message, the more common label is used.
 - A row is skipped if a label is missing or is not one of the allowed values. Capitals, spaces and hyphens are forgiven: "Baggage services" counts as `baggage_services`.
-- No files? *Use the lab's own labelled examples instead* fine-tunes on 100 of the lab's examples.
+- No class file? The same cell has a commented-out line that uses 100 of the lab's own labelled examples instead.
 
 ## Setup checklist (do this a few days before class)
 
 - [ ] **Run [`notebooks/projector_demo.ipynb`](../notebooks/projector_demo.ipynb) from start to finish on a GPU.** As of 3 October 2026 the chat has been tested in Colab with simulated answers and with a tiny stand-in model, but not yet on the real model on a GPU, because Colab's free GPU limit had been used up. Do a full run, including a fine-tune, before relying on it in class.
 - [ ] **Keep the repository public.** The notebook's first cell runs `git clone` on this repository and branch (set in `scripts/build_notebook.py`).
-- [ ] **Prepare the examples sheet and the rules handout** for the company you picked (see above).
+- [ ] **Prepare the examples file and the rules handout** for the company you picked (see above).
 - [ ] **Plan for the GPU.** Free Colab GPUs are not guaranteed, and the free tier cut ours off after about 5.5 hours of use. Avoid heavy GPU use in the day before class, and have a **Colab Pro** or pay-as-you-go account ready.
 - [ ] **Rehearse the flow without a GPU:** `python -m lab.demo --simulate` from `nemotron-lab/`. Answers are simulated and the page says so.
 - [ ] **Check the model license and access.** `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1` is published under NVIDIA's open model license. Confirm that it is still downloadable without a login and that classroom use is fine.
@@ -47,7 +48,8 @@ The timings are a suggestion and have not been rehearsed with a class.
 
 **Things to know about the chat**
 
-- One Colab GPU does everything, so the chat cannot answer while the model is fine-tuning.
+- One Colab GPU does everything, so the chat cannot answer while the model is fine-tuning. The chat page says so.
+- The chat page is only a chat. Fine-tuning and switching model are done in the notebook.
 - The fine-tuned model is kept only while the notebook session lasts.
 - The chat's address only works in the instructor's own browser, while the notebook is running.
 
@@ -95,9 +97,9 @@ Quick mode only tests 100 examples, so "100" means 100 was enough, not that it i
 | `No GPU found` | Runtime → Change runtime type → T4 GPU, then re-run the cells |
 | "Cannot connect to GPU backend" | Colab's free GPU limit is used up. Wait for it to reset, or use Colab Pro or pay-as-you-go. Rehearsal mode still works without a GPU |
 | `git clone` fails | Repo isn't public, or the `REPO`/`BRANCH` in the first cell is wrong |
-| A labelled file is rejected | It needs the `input` (or `id`) column and one column per answer field, with the column names from the examples file |
+| The notebook says it could not use a file | It needs the `input` (or `id`) column and one column per answer field, with the column names from the examples file |
 | Rows are skipped | A label is missing, or is not one of the allowed values listed in the chat's first message |
-| Fine-tuning takes too long | Time grows with the number of examples. Press **Stop**; the original model is unchanged. Use about 100 examples |
+| Fine-tuning takes too long | Time grows with the number of examples. Interrupt the cell (the stop button next to it); the original model is unchanged. Use about 100 examples |
 | The chat page stops responding | The notebook session ended. Re-run the notebook's cells. The fine-tuned model is lost and has to be trained again |
 
 ---

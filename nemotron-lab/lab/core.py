@@ -317,21 +317,25 @@ def pick_training_rows(scn, n):
 
 
 def train(model, tok, scn, n_examples=100, data="clean", epochs=2, learning_rate=2e-4, batch_size=4,
-          lora_rank=16, max_len=768, seed=0, progress=None):
+          lora_rank=16, max_len=768, seed=0, progress=None, rows=None):
     """LoRA fine-tuning. Returns (model_with_adapter, list_of_losses).
 
     data: 'clean' (expert labels) or 'noisy' (30% of rows have one wrong label).
     Calling train() again starts over from the original model.
     progress: optional callback(step, total_steps, loss, seconds_left), called after every step. If it raises,
     training stops and the original model is left without an adapter.
+    rows: train on exactly these labelled rows (for example, ones a class labelled) instead of the lab's own.
     """
     import torch
     from peft import LoraConfig, PeftModel, get_peft_model
 
     if isinstance(model, PeftModel):
         model = model.unload()  # drop the previous adapter, keep the original weights
-    pool = scn.train if data == "clean" else scn.train_noisy
-    rows = [pool[i] for i in pick_training_rows(scn, n_examples)]  # same rows for clean and noisy
+    if rows is not None:
+        rows, data = list(rows), "labelled"
+    else:
+        pool = scn.train if data == "clean" else scn.train_noisy
+        rows = [pool[i] for i in pick_training_rows(scn, n_examples)]  # same rows for clean and noisy
     rng = random.Random(seed)
     torch.manual_seed(seed)
 

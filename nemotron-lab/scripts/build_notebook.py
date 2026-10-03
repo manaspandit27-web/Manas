@@ -308,15 +308,12 @@ print("\nALL DONE")'''),
 DEMO_CELLS = [
     ("md", """# Projector demo: chat with Nemotron before and after fine-tuning
 
-Put this on the projector. It is a plain chat page on top of the model:
+The instructor runs this notebook. Students do not.
 
-1. **Ask.** Type a message and Nemotron answers, as it was downloaded.
-2. **Fine-tune.** Press *Fine-tune*, add the labelled files students sent back, and start. The progress shows on screen.
-3. **Switch and ask again.** Switch the chat to the fine-tuned model and ask the same questions again.
-
-**Getting labels from the class.** In the *Fine-tune* box, download the examples file and share it (for example as a Google Sheet). Students fill in the label columns using the company's rules and send the file back as CSV. Several files are fine; when two students label the same message, the more common label is used.
-
-Fine-tuning on 100 examples takes about 9 to 13 minutes on a free T4.
+1. **Ask.** The notebook opens a plain chat page for the projector. You type messages and Nemotron answers, as it was downloaded.
+2. **Label.** Students label the examples in `scenarios/<company>/examples_to_label.csv` (100 messages with empty answer columns) and send the file back.
+3. **Fine-tune.** You load their file and run the fine-tuning cell here in the notebook, so the class sees the code and its progress. About 9 to 13 minutes for 100 examples on a free T4.
+4. **Switch and ask again.** One more cell switches the chat to the fine-tuned model. Back in the chat, press *Ask the same questions again*.
 
 *To rehearse without a GPU, on a laptop:* `python -m lab.demo --simulate` (answers are simulated)."""),
 
@@ -333,22 +330,43 @@ os.chdir("/content/lab-repo/nemotron-lab")
 !pip install -q bitsandbytes peft
 sys.path.insert(0, ".")
 from lab import core, demo
+import pandas as pd
 print("Ready.")"""),
+
+    ("code", """# The company for this session. Students label scenarios/<SCENARIO>/examples_to_label.csv
+SCENARIO = "airline_complaints"   # others: claims_triage, expense_audit, lead_qualification, invoice_intake"""),
 
     ("code", """# Loads NVIDIA Nemotron onto the GPU (~3 minutes)
 model, tok = core.load_model()"""),
 
     ("md", """## 2. Start the chat
 
-The next cell prints the chat's address. Open it in a new tab and put that tab on the projector. The address only works in your own browser, while this notebook is running."""),
+The next cell prints the chat's address. Open it in a new tab and put that tab on the projector. The address only works in your own browser, while this notebook is running.
 
-    ("code", """engine = demo.launch(model, tok)"""),
+Ask the model a few messages before going on."""),
 
-    ("md", """## 3. Keep the session alive
+    ("code", """chat = demo.launch(model, tok, scenario=SCENARIO)"""),
 
-Leave this cell running during class and keep this browser tab open, so Colab does not treat the session as idle."""),
+    ("md", """## 3. Fine-tune on the class's labels
 
-    ("code", """demo.keep_running(engine)"""),
+Run these cells in front of the class, once the students have sent back the examples file."""),
+
+    ("code", """# The examples the class labelled: choose the CSV file (or files) the students sent back
+from google.colab import files
+labelled = chat.read_labelled(files.upload())
+# labelled = chat.lab_examples(100)   # no class file? This uses the lab's own labelled examples instead
+pd.DataFrame(labelled).head(10)"""),
+
+    ("code", """# Fine-tune Nemotron on those examples.
+# LoRA training: about 1% of the model's weights are trained, the rest stay as downloaded.
+losses = chat.finetune(labelled, epochs=2)
+core.plot_loss(losses)"""),
+
+    ("md", """## 4. Switch the chat to the fine-tuned model
+
+After this cell, go back to the chat and press *Ask the same questions again*."""),
+
+    ("code", """chat.serve("fine-tuned")   # chat.serve("original") switches back"""),
 ]
 
 

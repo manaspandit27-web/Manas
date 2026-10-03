@@ -1,4 +1,5 @@
-"""Checks the projector chat: asking, reading the class's labelled files, fine-tuning on them, and the web server.
+"""Checks the projector chat and the notebook steps around it: the examples file, reading the class's labels,
+fine-tuning on them, switching model, and the web server.
 
 Run from nemotron-lab/:  python -m pytest -q tests
 """
@@ -7,7 +8,6 @@ import csv
 import io
 import json
 import sys
-import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -18,11 +18,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from lab import core, demo  # noqa: E402
 from test_lab import _tiny_model_and_tokenizer  # noqa: E402
 
+SCENARIOS = [s["scenario"] for s in core.list_scenarios()]
 
-def _labelled(scn, n=24, wrong=()):
-    """The blank examples file, filled in the way a student would (correctly, unless the row number is in `wrong`)."""
+
+def _fill_in(scn, text, wrong=()):
+    """An examples file, filled in the way a student would (correctly, unless the row number is in `wrong`)."""
     truth = {r["id"]: r for r in scn.train}
-    rows = list(csv.DictReader(io.StringIO(demo.blank_examples(scn, n))))
+    rows = list(csv.DictReader(io.StringIO(text)))
     out = io.StringIO()
     w = csv.DictWriter(out, fieldnames=list(rows[0]))
     w.writeheader()
@@ -34,58 +36,68 @@ def _labelled(scn, n=24, wrong=()):
     return out.getvalue()
 
 
-def _turns(engine):
-    return [t for t in engine.state()["thread"] if t["kind"] == "turn"]
+def _turns(chat):
+    return [t for t in chat.state()["thread"] if t["kind"] == "turn"]
 
 
-def test_ask_then_finetune_on_class_labels_then_ask_again(tmp_path):
-    e = demo.Engine(demo.SimulatedBackend(speed=0))
-    scn = e.scn()
-    e.ask(scn.test[0]["input"])
-    e.wait()
-    e.ask("My bag is lost and I am a Gold member")
-    e.wait()
-    first, typed = _turns(e)
-    assert first["status"] == "done" and first["mode"] == "base" and [f["name"] for f in first["fields"]] == list(scn.fields)
+@pytest.mark.parametrize("key", SCENARIOS)
+def test_examples_file_to_hand_out(key):
+    scn = core.load_scenario(key)
+    path = core.SCENARIO_DIR / key / demo.EXAMPLES_FILE
+    assert path.read_text(encoding="utf-8") == demo.blank_examples(scn)  # rebuild with: python -m lab.demo --write-examples
+    rows = list(csv.DictReader(io.StringIO(path.read_text(encoding="utf-8"))))
+    assert len(rows) == 100 and list(rows[0]) == ["id", "input", *scn.fields]
+    assert all(r["input"] and not any(r[f] for f in scn.fields) for r in rows)  # the messages, with nothing filled in
+    assert not {r["input"] for r in rows} & {r["input"] for r in scn.test}       # none of them is a test question
 
-    opening = e.state()["scenario"]["opening"]  # the chat starts with the lab's own instruction, word for word
+
+def test_ask_then_finetune_in_the_notebook_then_ask_again(tmp_path, capsys):
+    chat = demo.Chat(demo.SimulatedBackend(speed=0), "airline_complaints")
+    scn = chat.scn
+    opening = chat.state()["opening"]  # the chat starts with the lab's own instruction, word for word
     assert core.system_prompt(scn).endswith(opening) and opening.startswith("You work at Skyward Airways.")
-    e.clear()  # a fresh chat: the original model acknowledges the instruction, then the questions follow
-    e.wait()
-    hello = e.state()["thread"][0]
+    chat.greet()  # the original model acknowledges it
+    chat.wait()
+    hello = chat.state()["thread"][0]
     assert hello["kind"] == "hello" and hello["status"] == "done" and hello["reply"]
-    e.ask(first["text"])
-    e.wait()
-    e.ask(typed["text"])
-    e.wait()
+
+    chat.ask(scn.test[0]["input"])
+    chat.wait()
+    chat.ask("My bag is lost and I am a Gold member")
+    chat.wait()
+    first, typed = _turns(chat)
+    assert first["status"] == "done" and first["model"] == "original"
+    assert [f["name"] for f in first["fields"]] == list(scn.fields)
 
     with pytest.raises(ValueError):
-        e.serve_model("tuned")  # nothing has been fine-tuned yet
-    with pytest.raises(ValueError):
-        e.finetune("class")     # and no labelled examples have been added
+        chat.serve("fine-tuned")  # nothing has been fine-tuned yet
 
-    e.add_examples([("anna.csv", _labelled(scn)), ("ben.csv", _labelled(scn))])
-    assert e.state()["examples"] == {"count": 24, "files": 2, "skipped": 0, "problems": [], "min": demo.MIN_EXAMPLES}
-    e.finetune("class", epochs=1)
-    e.wait()
-    assert e.error is None and e.training["status"] == "done"
-    assert e.tuned()["n"] == 24 and e.tuned()["label_accuracy"] == 100
-    assert e.serving == "base"  # switching the model is a separate step
+    # the notebook's three steps: read the file the class filled in, fine-tune, switch model
+    sent_back = tmp_path / "class_labels.csv"
+    sent_back.write_text(_fill_in(scn, (core.SCENARIO_DIR / scn.key / demo.EXAMPLES_FILE).read_text()), encoding="utf-8")
+    labelled = chat.read_labelled([sent_back])
+    assert len(labelled) == 100 and "100 labelled examples from 1 file(s)" in capsys.readouterr().out
+    losses = chat.finetune(labelled, epochs=1)
+    assert len(losses) == 25 and chat.tuned["examples"] == 100 and chat.busy is None
+    assert chat.serving == "original"  # switching the model is a separate step
+    chat.serve("fine-tuned")
+    assert "fine-tuned model" in capsys.readouterr().out and chat.state()["serving"] == "fine-tuned"
 
-    e.serve_model("tuned")
-    e.ask_again()
-    e.wait()
-    turns = _turns(e)
-    assert [t["mode"] for t in turns] == ["base", "base", "tuned", "tuned"]
+    chat.ask_again()
+    chat.wait()
+    turns = _turns(chat)
+    assert [t["model"] for t in turns] == ["original", "original", "fine-tuned", "fine-tuned"]
     assert [t["text"] for t in turns[2:]] == [first["text"], typed["text"]]
     with pytest.raises(ValueError):
-        e.ask_again()  # the fine-tuned model has now answered everything
+        chat.ask_again()  # the fine-tuned model has now answered everything
+    with pytest.raises(ValueError):
+        chat.finetune(labelled[:3])  # too few examples to train on
 
 
 def test_reading_the_files_students_send_back():
     scn = core.load_scenario("airline_complaints")
-    good = _labelled(scn, 24)
-    careless = _labelled(scn, 24, wrong={0})
+    blank = demo.blank_examples(scn, 24)
+    good, careless = _fill_in(scn, blank), _fill_in(scn, blank, wrong={0})
     rows, skipped, problems = demo.read_labelled(scn, [("a.csv", good), ("b.csv", good), ("c.csv", careless)])
     truth = {r["input"]: r for r in scn.train}
     assert len(rows) == 24 and not skipped and not problems
@@ -102,58 +114,53 @@ def test_reading_the_files_students_send_back():
     assert len(rows) == 1 and rows[0]["input"] == lines[0]["input"] and rows[0]["route_to"] == lines[0]["route_to"]
     assert skipped == 1 and len(problems) == 1 and problems[0].startswith("notes.csv")
 
-
-def test_one_job_at_a_time_and_stopping():
-    e = demo.Engine(demo.SimulatedBackend(speed=0.3))
-    e.finetune("lab", n=100)
-    with pytest.raises(demo.Busy):
-        e.ask("hello")
-    time.sleep(0.2)
-    e.cancel()
-    e.wait()
-    assert e.training["status"] == "stopped" and e.tuned() is None and e.job is None
-    e.backend.speed = 0
-    e.ask("hello")
-    e.wait()
-    assert _turns(e)[0]["status"] == "done"
+    chat = demo.Chat(demo.SimulatedBackend(speed=0), "airline_complaints")
+    assert len(chat.read_labelled({"upload.csv": good.encode("utf-8")})) == 24  # what Colab's files.upload() returns
 
 
 def test_real_backend_on_a_tiny_model():
     scn, model, tok = _tiny_model_and_tokenizer()
-    e = demo.Engine(demo.ModelBackend(model, tok))
-    e.greet()  # whatever the model says to the instruction alone is shown, unless it is empty or a JSON answer
-    e.wait()
-    assert e.error is None and all(x["status"] == "done" for x in e.state()["thread"])
-    e.ask(scn.test[0]["input"])
-    e.wait()
-    assert e.error is None and _turns(e)[0]["status"] == "done"
+    chat = demo.Chat(demo.ModelBackend(model, tok), scn.key)
+    chat.greet()  # whatever the model says to the instruction alone is shown, unless it is empty or a JSON answer
+    chat.wait()
+    assert chat.error is None and all(x["status"] == "done" for x in chat.state()["thread"])
+    chat.ask(scn.test[0]["input"])
+    chat.wait()
+    assert chat.error is None and _turns(chat)[0]["status"] == "done"
 
-    e.add_examples([("class.csv", _labelled(scn, 24))])
-    e.finetune("class", epochs=1)
-    e.wait()
-    assert e.error is None and e.tuned()["n"] == 24 and len(e.training["losses"]) == 6
-    assert sum("lora_A" in n for n, _ in e.backend.model.named_parameters()) == 2 * 7
+    labelled = chat.read_labelled({"class.csv": _fill_in(scn, demo.blank_examples(scn, 24))})
+    losses = chat.finetune(labelled, epochs=1)
+    assert len(losses) == 6 and chat.tuned["examples"] == 24
+    assert sum("lora_A" in n for n, _ in chat.backend.model.named_parameters()) == 2 * 7
 
-    e.serve_model("tuned")
-    e.ask_again()
-    e.wait()
-    assert e.error is None and [t["mode"] for t in _turns(e)] == ["base", "tuned"]
-    e.serve_model("base")  # the original model still answers, with the adapter switched off
-    e.ask("One more question")
-    e.wait()
-    assert e.error is None and _turns(e)[-1]["mode"] == "base"
+    chat.serve("fine-tuned")
+    chat.ask_again()
+    chat.wait()
+    assert chat.error is None and [t["model"] for t in _turns(chat)] == ["original", "fine-tuned"]
+    chat.serve("original")  # the original model still answers, with the adapter switched off
+    chat.ask("One more question")
+    chat.wait()
+    assert chat.error is None and _turns(chat)[-1]["model"] == "original" and _turns(chat)[-1]["status"] == "done"
 
-    # stopping a fine-tune part-way leaves the original model, with no adapter on it
-    e.finetune("lab", n=24, epochs=1)
-    while not e.training.get("losses"):
-        time.sleep(0.01)
-    e.cancel()
-    e.wait()
-    assert e.training["status"] == "stopped" and e.tuned() is None and e.serving == "base"
-    assert not any("lora" in n for n, _ in e.backend.model.named_parameters())
-    e.ask("Still there?")
-    e.wait()
-    assert e.error is None and _turns(e)[-1]["status"] == "done"
+    # fine-tuning again starts from the original model rather than stacking adapters
+    chat.finetune(chat.lab_examples(8), epochs=1)
+    assert chat.serving == "original" and chat.tuned["examples"] == 8
+    assert sum("lora_A" in n for n, _ in chat.backend.model.named_parameters()) == 2 * 7
+
+    # interrupting a fine-tune part-way leaves the original model, with no adapter on it
+    def interrupted(*args, **kwargs):
+        raise KeyboardInterrupt()
+    real_bar, core._bar = core._bar, lambda total, label: interrupted
+    try:
+        with pytest.raises(KeyboardInterrupt):
+            chat.finetune(chat.lab_examples(8), epochs=1)
+    finally:
+        core._bar = real_bar
+    assert chat.busy is None and chat.tuned is None and chat.serving == "original"
+    assert not any("lora" in n for n, _ in chat.backend.model.named_parameters())
+    chat.ask("Still there?")
+    chat.wait()
+    assert chat.error is None and _turns(chat)[-1]["status"] == "done"
 
 
 def _call(port, path, body=None):
@@ -167,26 +174,24 @@ def _call(port, path, body=None):
 
 
 def test_web_server():
-    e = demo.Engine(demo.SimulatedBackend(speed=0))
-    server = demo.serve(e, port=0)
+    chat = demo.Chat(demo.SimulatedBackend(speed=0), "airline_complaints")
+    server = demo.serve(chat, port=0)
     port = server.server_address[1]
     try:
         status, page = _call(port, "/")
         assert status == 200 and b"Nemotron" in page
-        status, blank = _call(port, "/examples.csv?n=24")
-        assert status == 200 and len(list(csv.DictReader(io.StringIO(blank.decode())))) == 24
-
         assert _call(port, "/api/ask", {"text": "My bag is lost"})[0] == 200
-        e.wait()
+        chat.wait()
         assert _call(port, "/api/ask", {"text": "  "})[0] == 400
-        assert _call(port, "/api/finetune", {"source": "class"})[0] == 400  # no examples yet
-        status, body = _call(port, "/api/examples", {"files": [{"name": "class.csv", "text": _labelled(e.scn())}]})
-        assert status == 200 and json.loads(body)["examples"]["count"] == 24
-        assert _call(port, "/api/finetune", {"source": "class", "epochs": 1})[0] == 200
-        e.wait()
-        assert _call(port, "/api/serve", {"mode": "tuned"})[0] == 200
+        chat.busy = "fine-tuning"  # while the notebook is training, the page cannot ask
+        assert _call(port, "/api/ask", {"text": "Hello?"})[0] == 409
+        chat.busy = None
+        chat.finetune(chat.lab_examples(8), epochs=1)
+        chat.serve("fine-tuned")
+        assert _call(port, "/api/again", {})[0] == 200
+        chat.wait()
         state = json.loads(_call(port, "/api/state")[1])
-        assert state["serving"] == "tuned" and state["tuned"]["n"] == 24 and state["thread"][0]["status"] == "done"
-        assert _call(port, "/api/nothing", {})[0] == 404
+        assert state["serving"] == "fine-tuned" and [t["model"] for t in state["thread"] if t["kind"] == "turn"] == ["original", "fine-tuned"]
+        assert _call(port, "/api/finetune", {})[0] == 404  # fine-tuning is not something the page can do
     finally:
         server.shutdown()

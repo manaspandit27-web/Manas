@@ -5,9 +5,9 @@ A starting point for an in-class activity for the DSAIL session on **Data and Fi
 How the session would run:
 
 1. **Ask.** The instructor opens a chat with the model on the projector and asks it questions from the business process. It performs poorly.
-2. **Label.** Students label example messages using the company's rules and send them back.
-3. **Fine-tune.** The instructor fine-tunes the model on the class's labels, on screen (about 10 minutes for 100 examples on a free Colab GPU).
-4. **Ask again.** The instructor switches the chat to the fine-tuned model and asks the same questions again.
+2. **Label.** Students label the messages in `scenarios/<company>/examples_to_label.csv` using the company's rules and send the file back.
+3. **Fine-tune.** The instructor loads that file and runs the fine-tuning cell in the Colab notebook, so the class sees the code and its progress (about 10 minutes for 100 examples on a free Colab GPU).
+4. **Ask again.** One more notebook cell switches the chat to the fine-tuned model, and the instructor asks the same questions again.
 
 Before class, the instructor can dry run the two other ways of bringing knowledge to a model, so that the session compares three ways of bringing company knowledge to a model on the same held-out test cases:
 
@@ -26,7 +26,7 @@ This is just a demo to get the ball rolling! The session follows the idea in Bri
 | [`notebooks/instructor_dry_run.ipynb`](notebooks/instructor_dry_run.ipynb) | Instructors, before class | Runs baselines and fine-tuning sweeps on all 5 scenarios (100 test cases each) and reports the fewest examples that give a clear improvement - this is for us to test and make sure it works (I've run it once), and for us to have some numbers on correctness we can compare at the end of the session. |
 | [`instructor/INSTRUCTOR-GUIDE.md`](instructor/INSTRUCTOR-GUIDE.md) | Instructors | Run of show, how the class labels examples, setup checklist, debrief questions, troubleshooting |
 | [`instructor/dry-run-2026-10-03/`](instructor/dry-run-2026-10-03/README.md) | Instructors | Results of the full dry run on a free Colab T4 I ran: tables, raw CSVs, executed notebook |
-| `scenarios/<name>/` | Both | `case.md` (1-page case), `policy.md` (the expert rules), `train.csv` (600 expert-labeled), `train_noisy.csv` (same, 30% mislabeled), `test.csv` (100 held out) |
+| `scenarios/<name>/` | Both | `examples_to_label.csv` (100 messages for students to label), `case.md` (1-page case), `policy.md` (the expert rules), `train.csv` (600 expert-labeled), `train_noisy.csv` (same, 30% mislabeled), `test.csv` (100 held out) |
 | `lab/demo.py`, `lab/demo_ui.html` | Under the hood | The projector chat: a small web server and its page |
 | `lab/core.py` | Under the hood | Loading, prompting, LoRA training and scoring, kept out of the notebook so cells stay short |
 | [`notebooks/finetune_lab.ipynb`](notebooks/finetune_lab.ipynb) | Not used in the session | An earlier version in which every student runs the fine-tuning themselves in Colab. Kept for reference |
@@ -47,7 +47,7 @@ All companies, people and data are synthetic. Labels come from applying each `po
 
 ## Running it
 
-**In Colab (instructor only):** open `notebooks/projector_demo.ipynb` in Colab, choose a **T4 GPU** runtime, run the cells in order, and open the chat address the notebook prints. The first cell clones this repo, so the repo has to be public (see the instructor setup checklist).
+**In Colab (instructor only):** open `notebooks/projector_demo.ipynb` in Colab, choose a **T4 GPU** runtime, and run the cells in order. It prints the chat's address, and the later cells load the class's labelled file, fine-tune, and switch the chat to the fine-tuned model. The first cell clones this repo, so the repo has to be public (see the instructor setup checklist).
 
 **Rehearse without a GPU:** `python -m lab.demo --simulate` from `nemotron-lab/` opens the same chat with simulated answers.
 
