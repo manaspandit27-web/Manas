@@ -110,7 +110,7 @@ You'll work in teams on one of five business processes: airline complaint triage
 1. test Nemotron with **prompting only**,
 2. test it with the **policy document pasted in** (what RAG automates),
 3. **fine-tune it** on expert-labeled examples, choosing how many and how clean,
-4. compare all three on 40 held-out cases, then try to break your model.
+4. compare all three on 60 held-out cases, then try to break your model.
 
 ## 7. Before class (5 minutes)
 

@@ -85,3 +85,35 @@ def test_train_and_evaluate_smoke():
     model, _ = core.train(model, tok, scn, n_examples=4, epochs=1, batch_size=4, lora_rank=4)
     assert sum("lora_A" in n for n, _ in model.named_parameters()) == 2 * 7
     assert isinstance(core.ask(model, tok, scn, "My bag is lost"), (dict, str))
+
+
+def test_wilson_range():
+    assert core.wilson_range(0, 60)[0] == 0 and core.wilson_range(60, 60)[1] == 100
+    lo, hi = core.wilson_range(30, 60)
+    assert lo < 50 < hi and hi - lo < 30
+
+
+def test_sweep_resumes_and_reports(tmp_path, monkeypatch):
+    scn, model, tok = _tiny_model_and_tokenizer()
+    monkeypatch.setattr(core, "load_scenario", lambda key: scn)
+    out = tmp_path / "results.csv"
+    settings = [(8, "clean", 1), (8, "noisy", 1)]
+    model, rows = core.sweep(model, tok, ["airline_complaints"], settings, n_test=4, out_csv=out)
+    assert len(rows) == 4  # prompt, prompt+docs, two fine-tunes
+    model, rows = core.sweep(model, tok, ["airline_complaints"], settings, n_test=4, out_csv=out)
+    assert len(rows) == 4  # nothing re-run
+    table, recs = core.sweep_report(out, plot=False)
+    assert "airline_complaints" in recs.index and table.shape[1] == 4
+
+
+@pytest.mark.parametrize("key", SCENARIOS)
+def test_small_samples_cover_every_rule(key):
+    scn = core.load_scenario(key)
+    for n, floor in ((25, 1), (50, 3), (100, 5), (300, 5)):
+        idx = core.pick_training_rows(scn, n)
+        assert len(idx) == len(set(idx)) == n
+        for f, opts in scn.choices.items():
+            for v in opts or []:
+                available = sum(r[f] == v for r in scn.train)
+                got = sum(scn.train[i][f] == v for i in idx)
+                assert got >= min(floor, available), (f, v, n)

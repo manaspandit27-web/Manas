@@ -161,6 +161,17 @@ def _norm(v):
         return s
 
 
+def wilson_range(k, n, z=1.96):
+    """95% confidence range (in %) for k successes out of n. If two methods' ranges don't overlap,
+    the difference is very unlikely to be luck."""
+    if n == 0:
+        return 0, 0
+    p = k / n
+    centre = (p + z * z / (2 * n)) / (1 + z * z / n)
+    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / (1 + z * z / n)
+    return round(100 * max(0.0, centre - half)), round(100 * min(1.0, centre + half))
+
+
 def score(scn, rows, replies, label):
     """Compare model replies to the expert labels. Returns {'summary': {...}, 'rows': [...]}."""
     per_row, correct = [], {f: 0 for f in scn.fields}
@@ -181,8 +192,9 @@ def score(scn, rows, replies, label):
         rec["all correct"] = ok_all
         per_row.append(rec)
     n = max(len(rows), 1)
+    lo, hi = wilson_range(all_right, n)
     summary = {"method": label, "examples": len(rows), "valid JSON %": round(100 * valid / n),
-               "all fields correct %": round(100 * all_right / n)}
+               "all fields correct %": round(100 * all_right / n), "95% range": f"{lo}-{hi}%"}
     summary.update({f"{f} %": round(100 * c / n) for f, c in correct.items()})
     return {"summary": summary, "rows": per_row}
 
@@ -243,7 +255,7 @@ def generate(model, tok, conversations, max_new_tokens=120, batch_size=16, progr
     return replies
 
 
-def evaluate(model, tok, scn, method="prompt", n=40, batch_size=16):
+def evaluate(model, tok, scn, method="prompt", n=60, batch_size=16):
     """method: 'prompt', 'prompt+docs' (policy pasted into the prompt) or 'fine-tuned'."""
     rows = scn.test[:n]
     convs = [build_messages(scn, r["input"], include_policy=(method == "prompt+docs")) for r in rows]
@@ -280,6 +292,30 @@ def _encode(tok, scn, row, max_len):
     return ids, labels
 
 
+def pick_training_rows(scn, n):
+    """Indices of n training rows that cover every answer value at least a few times (rare rules such as
+    "business class on a short flight" would otherwise barely appear in a small sample). Selection uses the
+    clean labels, so clean and noisy runs train on exactly the same messages."""
+    n = min(n, len(scn.train))
+    floor = 5 if n >= 100 else 3 if n >= 50 else 1
+    groups = {}
+    for i, row in enumerate(scn.train):
+        for f, opts in scn.choices.items():
+            if opts:
+                groups.setdefault((f, row[f]), []).append(i)
+    chosen = []
+    for _, idx in sorted(groups.items(), key=lambda kv: len(kv[1])):  # rarest values first
+        have = sum(i in chosen for i in idx)
+        for i in idx:
+            if have >= floor or len(chosen) >= n:
+                break
+            if i not in chosen:
+                chosen.append(i)
+                have += 1
+    chosen += [i for i in range(len(scn.train)) if i not in chosen][:n - len(chosen)]
+    return sorted(chosen)
+
+
 def train(model, tok, scn, n_examples=100, data="clean", epochs=2, learning_rate=2e-4, batch_size=4,
           lora_rank=16, max_len=768, seed=0):
     """LoRA fine-tuning. Returns (model_with_adapter, list_of_losses).
@@ -293,7 +329,7 @@ def train(model, tok, scn, n_examples=100, data="clean", epochs=2, learning_rate
     if isinstance(model, PeftModel):
         model = model.unload()  # drop the previous adapter, keep the original weights
     pool = scn.train if data == "clean" else scn.train_noisy
-    rows = pool[:n_examples]
+    rows = [pool[i] for i in pick_training_rows(scn, n_examples)]  # same rows for clean and noisy
     rng = random.Random(seed)
     torch.manual_seed(seed)
 
@@ -351,6 +387,143 @@ def train(model, tok, scn, n_examples=100, data="clean", epochs=2, learning_rate
     model.eval()
     model.config.use_cache = True
     return model, losses
+
+
+# ----------------------------------------------------- instructor dry run ---
+
+# (examples, data, epochs). The student settings cards A-E plus two extra points for the learning curve.
+CARDS = {"A": (25, "clean", 2), "B": (100, "clean", 2), "C": (300, "clean", 1), "D": (100, "noisy", 2),
+         "E": (300, "noisy", 1)}
+QUICK_SWEEP = [CARDS["B"], CARDS["D"]]
+FULL_SWEEP = [CARDS["A"], (50, "clean", 2), CARDS["B"], (200, "clean", 2), CARDS["C"], CARDS["D"], CARDS["E"]]
+SWEEP_COLUMNS = ["scenario", "method", "examples", "data", "epochs", "all_correct", "range_low", "range_high",
+                 "valid_json", "prompt_tokens", "train_minutes", "eval_seconds", "final_loss", "per_field"]
+
+
+def _base_model(model):
+    """Context manager that switches any trained adapter off (the original model)."""
+    from contextlib import nullcontext
+    from peft import PeftModel
+    return model.disable_adapter() if isinstance(model, PeftModel) else nullcontext()
+
+
+def _sweep_row(scn, res, method, examples="", data="", epochs="", train_minutes="", final_loss=""):
+    s = res["summary"]
+    lo, hi = s["95% range"].rstrip("%").split("-")
+    return {"scenario": scn.key, "method": method, "examples": examples, "data": data, "epochs": epochs,
+            "all_correct": s["all fields correct %"], "range_low": int(lo), "range_high": int(hi),
+            "valid_json": s["valid JSON %"], "prompt_tokens": s["prompt tokens / request"],
+            "train_minutes": train_minutes, "eval_seconds": s["seconds"], "final_loss": final_loss,
+            "per_field": json.dumps({k[:-2]: v for k, v in s.items() if k.endswith(" %") and k not in
+                                     ("valid JSON %", "all fields correct %")})}
+
+
+def sweep(model, tok, scenario_keys, settings, n_test=100, out_csv="dry_run_results.csv"):
+    """Run baselines and fine-tuning settings for each scenario, appending one row per run to out_csv.
+    Re-running skips anything already in the file, so a Colab disconnect loses at most one run."""
+    out = Path(out_csv)
+    done = []
+    if out.exists():
+        done = _read_csv(out)
+    seen = {(r["scenario"], r["method"], str(r["examples"]), r["data"], str(r["epochs"])) for r in done}
+
+    def save(row):
+        new = not out.exists()
+        with open(out, "a", newline="", encoding="utf-8") as fh:
+            w = csv.DictWriter(fh, fieldnames=SWEEP_COLUMNS)
+            if new:
+                w.writeheader()
+            w.writerow(row)
+        done.append({k: str(v) for k, v in row.items()})
+        seen.add((row["scenario"], row["method"], str(row["examples"]), row["data"], str(row["epochs"])))
+
+    for key in scenario_keys:
+        scn = load_scenario(key)
+        for method in ("prompt", "prompt+docs"):
+            if (key, method, "", "", "") in seen:
+                continue
+            print(f"\n=== {key}: {method}")
+            with _base_model(model):
+                res = evaluate(model, tok, scn, method, n=n_test)
+            save(_sweep_row(scn, res, method))
+        for n, data, epochs in settings:
+            if (key, "fine-tuned", str(n), data, str(epochs)) in seen:
+                continue
+            print(f"\n=== {key}: fine-tune on {n} {data} examples x {epochs} epoch(s)")
+            t0 = time.time()
+            model, losses = train(model, tok, scn, n_examples=n, data=data, epochs=epochs)
+            minutes = round((time.time() - t0) / 60, 1)
+            res = evaluate(model, tok, scn, "fine-tuned", n=n_test)
+            tail = losses[-5:]
+            save(_sweep_row(scn, res, "fine-tuned", n, data, epochs, minutes, round(sum(tail) / len(tail), 4)))
+            try:
+                import torch
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+            except ImportError:
+                pass
+    return model, done
+
+
+def sweep_report(csv_path="dry_run_results.csv", plot=True):
+    """Tables, learning curves and a recommended number of training examples per scenario."""
+    import pandas as pd
+    df = pd.read_csv(csv_path)
+    df["setting"] = df.apply(lambda r: r["method"] if r["method"] != "fine-tuned"
+                             else f"FT {int(r['examples'])} {r['data']} x{int(r['epochs'])}", axis=1)
+    df["result"] = df.apply(lambda r: f"{r['all_correct']}% ({r['range_low']}-{r['range_high']})", axis=1)
+    table = df.pivot_table(index="scenario", columns="setting", values="result", aggfunc="last")
+    order = df.assign(_m=df.method.map({"prompt": 0, "prompt+docs": 1}).fillna(2), _d=(df.data == "noisy"),
+                      _n=pd.to_numeric(df.examples, errors="coerce").fillna(0))
+    order = order.sort_values(["_m", "_d", "_n"]).setting.drop_duplicates()
+    table = table[[c for c in order if c in table.columns]]
+
+    recs = []
+    for key, g in df.groupby("scenario"):
+        base, docs = g[g.method == "prompt"], g[g.method == "prompt+docs"]
+        ft = g[(g.method == "fine-tuned") & (g.data == "clean")].sort_values("examples")
+        base_hi = int(base.range_high.iloc[-1]) if len(base) else 100
+        docs_hi = int(docs.range_high.iloc[-1]) if len(docs) else 100
+        clear = ft[ft.range_low > base_hi]
+        beats = ft[ft.range_low > docs_hi]
+        recs.append({
+            "scenario": key,
+            "prompt": f"{base.all_correct.iloc[-1]}%" if len(base) else "-",
+            "prompt+docs": f"{docs.all_correct.iloc[-1]}%" if len(docs) else "-",
+            "fewest examples: clearly beats prompt": int(clear.examples.iloc[0]) if len(clear) else "not reached",
+            "fewest examples: clearly beats prompt+docs": int(beats.examples.iloc[0]) if len(beats) else "not reached",
+            "train minutes per 100 example-passes": round(
+                (ft.train_minutes / (ft.examples * ft.epochs) * 100).median(), 1) if len(ft) else "-",
+        })
+    recs = pd.DataFrame(recs).set_index("scenario")
+
+    if plot and len(df):
+        import matplotlib.pyplot as plt
+        keys = sorted(df.scenario.unique())
+        fig, axes = plt.subplots(1, len(keys), figsize=(4 * len(keys), 3.4), squeeze=False, sharey=True)
+        for ax, key in zip(axes[0], keys):
+            g = df[df.scenario == key]
+            for method, color in (("prompt", "#9aa5b1"), ("prompt+docs", "#5b8def")):
+                m = g[g.method == method]
+                if len(m):
+                    ax.axhline(m.all_correct.iloc[-1], color=color, ls="--", label=method)
+            for data, color in (("clean", "#1f9d55"), ("noisy", "#e07a2f")):
+                m = g[(g.method == "fine-tuned") & (g.data == data)].sort_values("examples")
+                if len(m):
+                    ax.errorbar(m.examples, m.all_correct, yerr=[m.all_correct - m.range_low, m.range_high - m.all_correct],
+                                color=color, marker="o", capsize=3, label=f"fine-tuned ({data})")
+            ax.set_title(key, fontsize=10)
+            ax.set_xscale("log")
+            ax.minorticks_off()
+            ax.set_xticks([25, 50, 100, 200, 300], ["25", "50", "100", "200", "300"])
+            ax.set_xlabel("training examples")
+            ax.set_ylim(0, 105)
+            ax.spines[["top", "right"]].set_visible(False)
+        axes[0][0].set_ylabel("all fields correct (%)")
+        axes[0][-1].legend(fontsize=8, loc="lower right")
+        plt.tight_layout()
+        plt.show()
+    return table, recs
 
 
 # --------------------------------------------------------------- display ---

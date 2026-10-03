@@ -50,20 +50,24 @@ Use *Data → Split text to columns* on `|` to chart it live.
 
 - [ ] **Make the notebook reachable.** The notebook's first cell runs `git clone` on this repository and branch (set in `scripts/build_notebook.py`). The repo must be **public** for students to clone it without logging in, or you can copy the `nemotron-lab/` folder into a public course repo and update `REPO`/`BRANCH`, then run `python scripts/build_notebook.py`.
 - [ ] **Share the notebook link:** `https://colab.research.google.com/github/<owner>/<repo>/blob/<branch>/nemotron-lab/notebooks/finetune_lab.ipynb`. If the branch name contains a `/`, merge to `main` first and use `main` in the link.
-- [ ] **Do a full dry run on a free Colab T4** and time each step. Record the numbers for each scenario in the table below, so you can say what "good" looks like during the debrief.
+- [ ] **Run [`notebooks/instructor_dry_run.ipynb`](../notebooks/instructor_dry_run.ipynb) in Colab.** For all five scenarios it runs both baselines, fine-tunes at each settings card, and reports the **fewest training examples that give a clear improvement**, meaning the fine-tuned 95% range lies entirely above the baseline's. `MODE = "quick"` (cards B and D, ~1 hour on a free T4) tells you whether the default of 100 examples is enough. `MODE = "full"` (~3 hours on a T4, ~1 hour on an L4 or A100 with Colab Pro) gives the whole learning curve. Results save to Google Drive after every run, so a disconnect loses nothing. Copy the results into the table below.
 - [ ] **Check the model license and access.** `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1` is published under NVIDIA's open model license. Confirm that it is still downloadable without a login and that classroom use is fine.
 - [ ] **Have a backup.** Free Colab GPUs are usually available but not guaranteed for 90 people at once. Have a **Colab Pro** account ready to project a full run, and tell students without a GPU to pair up with a teammate.
 - [ ] *(Optional)* Ask students to run Step 0 before class. Colab sessions time out after ~90 minutes idle, so only do this right before class.
 
-### Dry-run results (fill in)
+### Dry-run results (fill in from `instructor_dry_run.ipynb`)
 
-| Scenario | Prompt | Prompt + docs | Fine-tuned (card B) | Train time | Notes |
-|---|---|---|---|---|---|
-| airline_complaints | | | | | |
-| invoice_intake | | | | | |
-| claims_triage | | | | | |
-| expense_audit | | | | | |
-| lead_qualification | | | | | |
+| Scenario | Prompt | Prompt + docs | Fine-tuned (card B) | Fewest examples to clearly beat prompt | Train min / 100 passes | Notes |
+|---|---|---|---|---|---|---|
+| airline_complaints | | | | | | |
+| invoice_intake | | | | | | |
+| claims_triage | | | | | | |
+| expense_audit | | | | | | |
+| lead_qualification | | | | | | |
+
+**If a scenario reports "not reached" for 100 examples:** raise `N_EXAMPLES` in the notebook's Step 4 default (and on cards B and D) to the number the dry run reports, or drop that scenario. Training time grows roughly in proportion to `N_EXAMPLES × EPOCHS`.
+
+**Why 100 examples has a good chance of working:** each training sample is drawn so that every answer value appears at least 5 times (at least 3 for 50 examples), so rare rules such as "business class on a short flight" or "enterprise + high intent → enterprise AE" are never missing. Clean and noisy runs use the same messages, so card B vs card D isolates label quality.
 
 **What to expect** (confirm in your dry run). Prompting alone usually gets the "obvious" fields (category, claim type, expense type) partly right but misses the company-specific rules (priority tiers, approval thresholds, SIU red flags, APAC routing), so its *all fields correct* score is low. Pasting the policy in usually helps, at the cost of many more tokens per request. Fine-tuning on 100+ clean examples should give the highest and most consistent scores. Noisy data and 25 examples should visibly underperform. Fields that need arithmetic (expense per-person limits) stay hard for every method, which is a good discussion point.
 

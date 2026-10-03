@@ -1,4 +1,4 @@
-"""Builds notebooks/finetune_lab.ipynb from the cells below (edit here, then re-run).
+"""Builds notebooks/finetune_lab.ipynb and notebooks/instructor_dry_run.ipynb from the cells below (edit here, then re-run).
 
 Usage:  python scripts/build_notebook.py
 """
@@ -15,7 +15,7 @@ CELLS = [
 
 **In this lab you will teach an open-weight AI model your company's expert judgment, then measure whether it worked.**
 
-You will try the three ways to bring company knowledge to a model, on the same 40 test cases:
+You will try the three ways to bring company knowledge to a model, on the same 60 test cases:
 
 | | Method | What the model gets |
 |---|---|---|
@@ -132,7 +132,9 @@ core.plot_loss(losses)"""),
 
     ("md", """## Step 6: Method 3, the fine-tuned model
 
-Same 40 test cases. None of them were in the training data."""),
+Same 60 test cases. None of them were in the training data.
+
+**Is the change real?** Look at the *95% range* column. If the fine-tuned range does not overlap the prompt-only range, the improvement is almost certainly not luck."""),
 
     ("code", """tuned = core.evaluate(model, tok, scn, "fine-tuned")
 display(core.compare(base, docs, tuned))
@@ -174,21 +176,105 @@ Copy the line below into the class leaderboard your instructor shares."""),
 ]
 
 
-def main():
-    cells = []
-    for kind, src in CELLS:
+DRY_RUN_CELLS = [
+    ("md", """# Instructor dry run: will students see a real change after fine-tuning?
+
+Run this **once, a few days before class**. For each of the five scenarios it measures, on **100** held-out test cases:
+
+* the two baselines: **prompt only** and **prompt + policy docs**,
+* **fine-tuned** accuracy at different amounts of clean and noisy training data (the student settings cards),
+* how long training takes on your GPU.
+
+It then tells you, per scenario, the **fewest training examples that give a clear improvement**, meaning the fine-tuned 95% range sits entirely above the baseline's range. Use that to set the default `N_EXAMPLES` and the settings cards.
+
+| `MODE` | Fine-tuning runs per scenario | Rough time, 5 scenarios |
+|---|---|---|
+| `"quick"` | 100 clean, 100 noisy (cards B and D) | ~1 hour on a free T4 |
+| `"full"` | 25 / 50 / 100 / 200 / 300 clean, 100 / 300 noisy | ~3 hours on a T4, ~1 hour on an L4 or A100 (Colab Pro) |
+
+*Times are estimates. The report prints the measured speed.* Results are saved after every run, so if Colab disconnects, re-run the cells and it continues where it stopped."""),
+
+    ("md", """## 1. Setup
+
+Runtime → Change runtime type → **T4 GPU** (or L4 / A100 with Colab Pro), then run:"""),
+    ("code", f"""# Downloads the lab materials and installs two libraries (~1 minute)
+REPO = "{REPO}"
+BRANCH = "{BRANCH}"
+import os, sys
+if not os.path.exists("/content/lab-repo"):
+    !git clone -q --depth 1 -b {{BRANCH}} {{REPO}} /content/lab-repo
+os.chdir("/content/lab-repo/nemotron-lab")
+!pip install -q bitsandbytes peft
+sys.path.insert(0, ".")
+from lab import core
+from IPython.display import Markdown, display
+import pandas as pd
+print("Ready. Scenarios:")
+display(pd.DataFrame(core.list_scenarios()))"""),
+
+
+    ("code", """# Options
+MODE = "quick"          # "quick" or "full"
+SCENARIOS = [s["scenario"] for s in core.list_scenarios()]   # or e.g. ["invoice_intake", "expense_audit"]
+SAVE_TO_DRIVE = True    # keeps results if the Colab session ends (asks for Google Drive permission)
+
+OUT = "dry_run_results.csv"
+if SAVE_TO_DRIVE:
+    from google.colab import drive
+    drive.mount("/content/drive")
+    OUT = "/content/drive/MyDrive/nemotron_dry_run_results.csv"
+SETTINGS = core.QUICK_SWEEP if MODE == "quick" else core.FULL_SWEEP
+print("Results file:", OUT)
+print("Fine-tuning settings (examples, data, epochs):", SETTINGS)"""),
+
+    ("code", """# Loads NVIDIA Nemotron onto the GPU (~3 minutes)
+model, tok = core.load_model()"""),
+
+    ("md", "## 2. Run everything (leave the tab open)"),
+
+    ("code", """model, rows = core.sweep(model, tok, SCENARIOS, SETTINGS, n_test=100, out_csv=OUT)"""),
+
+    ("md", """## 3. Results
+
+**How to read the recommendations:**
+
+* *fewest examples: clearly beats prompt*: the smallest training set whose fine-tuned 95% range lies entirely above the prompt-only range. If this is **100 or less**, the default student setting (card B) will show a detectable change.
+* *fewest examples: clearly beats prompt+docs*: the stronger test. Fine-tuning should beat pasting the policy into every prompt, too.
+* **"not reached"** means no setting cleared the bar. Raise the default `N_EXAMPLES` (or `EPOCHS`) for that scenario, or don't assign it.
+
+Copy the numbers into the *Dry-run results* table in `instructor/INSTRUCTOR-GUIDE.md`."""),
+
+    ("code", """table, recs = core.sweep_report(OUT)
+display(recs)
+display(table)"""),
+
+    ("code", """# Download the raw results (one row per run, including per-field accuracy)
+from google.colab import files
+files.download(OUT)"""),
+]
+
+
+def write(cells, out):
+    nb_cells = []
+    for kind, src in cells:
         lines = src.strip("\n").splitlines(keepends=True)
         if kind == "md":
-            cells.append({"cell_type": "markdown", "metadata": {}, "source": lines})
+            nb_cells.append({"cell_type": "markdown", "metadata": {}, "source": lines})
         else:
-            cells.append({"cell_type": "code", "metadata": {}, "execution_count": None, "outputs": [], "source": lines})
-    nb = {"cells": cells, "nbformat": 4, "nbformat_minor": 0,
+            nb_cells.append({"cell_type": "code", "metadata": {}, "execution_count": None, "outputs": [],
+                             "source": lines})
+    nb = {"cells": nb_cells, "nbformat": 4, "nbformat_minor": 0,
           "metadata": {"accelerator": "GPU", "colab": {"provenance": [], "gpuType": "T4"},
                        "kernelspec": {"display_name": "Python 3", "name": "python3"},
                        "language_info": {"name": "python"}}}
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(nb, indent=1, ensure_ascii=False) + "\n")
-    print(f"wrote {OUT} ({len(cells)} cells)")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(nb, indent=1, ensure_ascii=False) + "\n")
+    print(f"wrote {out} ({len(nb_cells)} cells)")
+
+
+def main():
+    write(CELLS, OUT)
+    write(DRY_RUN_CELLS, OUT.parent / "instructor_dry_run.ipynb")
 
 
 if __name__ == "__main__":

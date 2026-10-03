@@ -14,10 +14,11 @@ The session follows the idea in Bridgewater × Thinking Machines, *[Learning to 
 |---|---|---|
 | [`PRE-READ.md`](PRE-READ.md) | Students, before class | 15-minute interactive note: prompting vs RAG vs fine-tuning, determinism, open vs closed weights, the Bridgewater case |
 | [`notebooks/finetune_lab.ipynb`](notebooks/finetune_lab.ipynb) | Students, in class | The Colab notebook. Students run it top to bottom and edit only the ✏️ cells |
+| [`notebooks/instructor_dry_run.ipynb`](notebooks/instructor_dry_run.ipynb) | Instructors, before class | Runs baselines and fine-tuning sweeps on all 5 scenarios (100 test cases each) and reports the fewest examples that give a clear improvement |
 | [`instructor/INSTRUCTOR-GUIDE.md`](instructor/INSTRUCTOR-GUIDE.md) | Instructors | 60-minute run of show, settings cards, setup checklist, debrief questions, troubleshooting |
 | `scenarios/<name>/` | Both | `case.md` (1-page case), `policy.md` (the expert rules), `train.csv` (600 expert-labeled), `train_noisy.csv` (same, 30% mislabeled), `test.csv` (100 held out) |
 | `lab/core.py` | Under the hood | Loading, prompting, LoRA training and scoring, kept out of the notebook so cells stay short |
-| `scripts/` | Maintainers | `generate_data.py` rebuilds the datasets; `build_notebook.py` rebuilds the notebook |
+| `scripts/` | Maintainers | `generate_data.py` rebuilds the datasets; `build_notebook.py` rebuilds both notebooks |
 | `tests/` | Maintainers | Data checks and a CPU smoke test of the full train → evaluate loop on a tiny stand-in model |
 
 ## The five business processes
@@ -50,5 +51,6 @@ python -m pytest -q tests         # data checks + CPU smoke test (no GPU or mode
 
 - Model: `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1`, loaded in 4-bit (bitsandbytes NF4), with reasoning turned off via the `detailed thinking off` system prompt.
 - Fine-tuning: LoRA rank 16 on all attention and MLP projections (well under 1% of parameters are trained). The loss covers only the answer tokens. It uses fp16 mixed precision on a T4, or bf16 where supported.
-- Evaluation uses greedy (deterministic) decoding on the first 40 test examples. A field counts as correct on an exact match after normalization; the headline metric is *all fields correct*.
+- Training samples are drawn so that every answer value appears at least 5 times (`pick_training_rows`); clean and noisy runs use the same messages.
+- Evaluation uses greedy (deterministic) decoding on the first 60 test examples (100 in the instructor dry run). A field counts as correct on an exact match after normalization; the headline metric is *all fields correct*, shown with a 95% (Wilson) range.
 - Larger Nemotron models, such as Nemotron 3.5 Lightning 30B-A3B, need far more GPU memory than free Colab offers. To try one, change `DEFAULT_MODEL` in `lab/core.py` and use a bigger runtime.
