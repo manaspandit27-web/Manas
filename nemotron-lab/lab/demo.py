@@ -602,11 +602,12 @@ def launch(model=None, tok=None, *, simulate=False, port=8765):
     engine = Engine(backend)
     engine.greet()
     engine.server = serve(engine, port)
-    try:  # in Colab the page is reached through Colab's own private link to the port
-        from google.colab import output
-        output.serve_kernel_port_as_window(port, anchor_text="Open the Nemotron chat in a new tab")
+    try:  # in Colab the page is reached through Colab's own private address for the port
+        from google.colab.output import eval_js
+        engine.url = eval_js(f"google.colab.kernel.proxyPort({port})")
     except ImportError:
-        print(f"Nemotron chat: http://127.0.0.1:{port}")
+        engine.url = f"http://127.0.0.1:{port}"
+    print("Nemotron chat:", engine.url)
     return engine
 
 
