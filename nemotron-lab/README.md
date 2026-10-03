@@ -1,12 +1,12 @@
 # Nemotron fine-tuning lab: bringing your data to the model
 
-An in-class activity for an MBA session on **Data and Fine-Tuning Models**. Students fine-tune an open-weight model (NVIDIA **Llama-3.1-Nemotron-Nano-4B**) on one of five business processes in Google Colab. They compare three ways of bringing company knowledge to a model on the same held-out test cases:
+A starting point for an in-class activity for the DSAIL session on **Data and Fine-Tuning Models**. Students fine-tune an open-weight model (NVIDIA **Llama-3.1-Nemotron-Nano-4B**) on one of five business processes (synthetic data I generated) in Google Colab. They can compare three ways of bringing company knowledge to a model on the same held-out test cases:
 
 1. **Prompt only:** the task and allowed answers.
-2. **Prompt + docs:** the company policy pasted into every request (what RAG automates).
+2. **Prompt + docs:** the company policy pasted into every request (basically what RAG would automate, so a good chance to touch on that as well).
 3. **Fine-tuned:** LoRA training on expert-labeled examples. Students choose how many examples and how clean they are.
 
-The session follows the idea in Bridgewater × Thinking Machines, *[Learning to Replicate Expert Judgment in Financial Tasks](https://thinkingmachines.ai/news/learning-to-replicate-expert-judgment-in-financial-tasks/)* (June 2026): expert judgment that is hard to put in a prompt can be taught through labeled examples.
+This is just a demo to get the ball rolling! The session follows the idea in Bridgewater × Thinking Machines, *[Learning to Replicate Expert Judgment in Financial Tasks](https://thinkingmachines.ai/news/learning-to-replicate-expert-judgment-in-financial-tasks/)* (June 2026): expert judgment that is hard to put in a prompt can be taught through labeled examples.
 
 ## What's here
 
@@ -14,10 +14,10 @@ The session follows the idea in Bridgewater × Thinking Machines, *[Learning to 
 |---|---|---|
 | [`PRE-READ.md`](PRE-READ.md) | Students, before class | 15-minute interactive note: prompting vs RAG vs fine-tuning, determinism, open vs closed weights, the Bridgewater case |
 | [`notebooks/finetune_lab.ipynb`](notebooks/finetune_lab.ipynb) | Students, in class | The Colab notebook. Students run it top to bottom and edit only the ✏️ cells |
-| [`notebooks/instructor_dry_run.ipynb`](notebooks/instructor_dry_run.ipynb) | Instructors, before class | Runs baselines and fine-tuning sweeps on all 5 scenarios (100 test cases each) and reports the fewest examples that give a clear improvement |
-| [`notebooks/projector_demo.ipynb`](notebooks/projector_demo.ipynb) | Instructors, in class | A plain chat page for the projector: ask the model, fine-tune it on examples the class labelled, ask again |
+| [`notebooks/instructor_dry_run.ipynb`](notebooks/instructor_dry_run.ipynb) | Instructors, before class | Runs baselines and fine-tuning sweeps on all 5 scenarios (100 test cases each) and reports the fewest examples that give a clear improvement - this is for us to test and make sure it works (I've run it once) |
+| [`notebooks/projector_demo.ipynb`](notebooks/projector_demo.ipynb) | Instructors, in class | A plain chat page for the projector: I have the idea that we would open this on projector, ask the model our questions, see that it performs poorly, then fine-tune it on examples the class labelled, and then ask again and note the improvements.|
 | [`instructor/INSTRUCTOR-GUIDE.md`](instructor/INSTRUCTOR-GUIDE.md) | Instructors | 60-minute run of show, settings cards, setup checklist, debrief questions, troubleshooting |
-| [`instructor/dry-run-2026-10-03/`](instructor/dry-run-2026-10-03/README.md) | Instructors | Results of a full dry run on a free Colab T4: tables, raw CSVs, executed notebook |
+| [`instructor/dry-run-2026-10-03/`](instructor/dry-run-2026-10-03/README.md) | Instructors | Results of thd full dry run on a free Colab T4 I ran: tables, raw CSVs, executed notebook |
 | `scenarios/<name>/` | Both | `case.md` (1-page case), `policy.md` (the expert rules), `train.csv` (600 expert-labeled), `train_noisy.csv` (same, 30% mislabeled), `test.csv` (100 held out) |
 | `lab/demo.py`, `lab/demo_ui.html` | Under the hood | The projector chat: a small web server and its page |
 | `lab/core.py` | Under the hood | Loading, prompting, LoRA training and scoring, kept out of the notebook so cells stay short |
