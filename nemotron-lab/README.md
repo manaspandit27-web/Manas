@@ -9,7 +9,7 @@ How the session would run:
 3. **Fine-tune.** The instructor fine-tunes the model on the class's labels, on screen (about 10 minutes for 100 examples on a free Colab GPU).
 4. **Ask again.** The instructor switches the chat to the fine-tuned model and asks the same questions again.
 
-Before class, the dry run compares three ways of bringing company knowledge to a model on the same held-out test cases:
+Before class, the instructor can dry run the two other ways of bringing knowledge to a model, so that the session compares three ways of bringing company knowledge to a model on the same held-out test cases:
 
 1. **Prompt only:** the task and allowed answers.
 2. **Prompt + docs:** the company policy pasted into every request (basically what RAG would automate, so a good chance to touch on that as well).
@@ -21,11 +21,11 @@ This is just a demo to get the ball rolling! The session follows the idea in Bri
 
 | Path | For | What it is |
 |---|---|---|
-| [`notebooks/projector_demo.ipynb`](notebooks/projector_demo.ipynb) | Instructors, in class | A plain chat page for the projector: I have the idea that we would open this on projector, ask the model our questions, see that it performs poorly, then fine-tune it on examples the class labelled, and then ask again and note the improvements.|
+| [`notebooks/projector_demo.ipynb`](notebooks/projector_demo.ipynb) | Instructors, in class | A plain chat page for the projector: I have the idea that we would open this on projector in class, ask the model our questions, see that it performs poorly, then fine-tune it on examples the class labelled, and then ask again and note the improvements.|
 | [`PRE-READ.md`](PRE-READ.md) | Students, before class | 15-minute interactive note: prompting vs RAG vs fine-tuning, determinism, open vs closed weights, the Bridgewater case |
-| [`notebooks/instructor_dry_run.ipynb`](notebooks/instructor_dry_run.ipynb) | Instructors, before class | Runs baselines and fine-tuning sweeps on all 5 scenarios (100 test cases each) and reports the fewest examples that give a clear improvement - this is for us to test and make sure it works (I've run it once) |
+| [`notebooks/instructor_dry_run.ipynb`](notebooks/instructor_dry_run.ipynb) | Instructors, before class | Runs baselines and fine-tuning sweeps on all 5 scenarios (100 test cases each) and reports the fewest examples that give a clear improvement - this is for us to test and make sure it works (I've run it once), and for us to have some numbers on correctness we can compare at the end of the session. |
 | [`instructor/INSTRUCTOR-GUIDE.md`](instructor/INSTRUCTOR-GUIDE.md) | Instructors | Run of show, how the class labels examples, setup checklist, debrief questions, troubleshooting |
-| [`instructor/dry-run-2026-10-03/`](instructor/dry-run-2026-10-03/README.md) | Instructors | Results of thd full dry run on a free Colab T4 I ran: tables, raw CSVs, executed notebook |
+| [`instructor/dry-run-2026-10-03/`](instructor/dry-run-2026-10-03/README.md) | Instructors | Results of the full dry run on a free Colab T4 I ran: tables, raw CSVs, executed notebook |
 | `scenarios/<name>/` | Both | `case.md` (1-page case), `policy.md` (the expert rules), `train.csv` (600 expert-labeled), `train_noisy.csv` (same, 30% mislabeled), `test.csv` (100 held out) |
 | `lab/demo.py`, `lab/demo_ui.html` | Under the hood | The projector chat: a small web server and its page |
 | `lab/core.py` | Under the hood | Loading, prompting, LoRA training and scoring, kept out of the notebook so cells stay short |
