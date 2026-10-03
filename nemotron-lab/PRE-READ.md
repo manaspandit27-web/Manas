@@ -1,4 +1,4 @@
-# Pre-read: How do you bring your data to a model?
+# Pre-read: How do you bring your data to a model? (Just something Claude generated, not sure if we will have pre-work or not)
 
 *About 15 minutes. Read before class. You will fine-tune a real AI model in class, so no coding background is needed, but this note is.*
 
