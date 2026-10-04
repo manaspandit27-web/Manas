@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, ProcessRunResult, Register } from 'claude-code'
 
 import type { ShipTree } from '../types'
-import { basename, parseConfig, parseWorktrees, pushesTo, summarize, tail, type ShipConfig } from './git'
+import { basename, parseConfig, parseWorktrees, summarize, tail, type ShipConfig } from './git'
 
 type $ = EngineInterface
 
@@ -19,7 +19,6 @@ Then save what you used as .claude/ship.json so /ship can do it directly next ti
 {"main": "main", "remote": "origin", "test": ["<command>"], "rebuild": ["<command>"], "pushTo": "main"}
 ("pushTo": "branch" if this repo should only push its branch). Ask me before pushing if anything is unclear.`
 
-let redTeamed = false
 let isScanning = false
 
 async function git($: $, args: readonly string[], cwd: string): Promise<ProcessRunResult> {
@@ -181,7 +180,6 @@ async function ship($: $, args: string): Promise<string> {
       const pushed = await git($, ['push', '-u', cfg.remote, branch], top)
       if (pushed.exitCode !== 0) return `✗ Push of ${branch} failed:\n${tail(pushed.stderr)}`
     }
-    redTeamed = false
     const sha = (await git($, ['rev-parse', '--short', 'HEAD'], top)).stdout.trim()
 
     let rebuildNote = ''
@@ -206,17 +204,6 @@ async function ship($: $, args: string): Promise<string> {
   }
 }
 
-async function gateFor($: $): Promise<{ main: string; current: string | null } | undefined> {
-  const top = await topOf($)
-  if (top === undefined) return undefined
-  const cfg = await configOf($, top).catch(() => undefined)
-  if (cfg !== undefined && !cfg.redTeamGate) return undefined
-  const hasSkill = (await $.command.list()).some(c => c.name === 'red-team' || c.name.endsWith(':red-team'))
-  if (!hasSkill) return undefined
-  const current = (await git($, ['branch', '--show-current'], top)).stdout.trim() || null
-  return { main: cfg?.main ?? 'main', current }
-}
-
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const started = await next(e)
@@ -238,28 +225,9 @@ export const register: Register = on => {
 
   on('command.run', { command: 'ship' }, async ($, e) => ({ text: await ship($, e.args.trim()) }))
 
-  on('command.run', { command: 'red-team' }, ($, e, next) => {
-    redTeamed = true
-    return next(e)
-  })
-
-  on('tool.call', { tool: 'Skill' }, ($, e, next) => {
-    if (/(^|:)red-team$/.test(e.skill)) redTeamed = true
-    return next(e)
-  })
-
   on('tool.call', { tool: 'Bash' }, async ($, e, next) => {
-    const isGit = /\bgit\b/.test(e.command)
-    if (isGit && /\bpush\b/.test(e.command) && !redTeamed && !/\bSHIP_SKIP_REDTEAM=1\b/.test(e.command)) {
-      const gate = await gateFor($)
-      if (gate !== undefined && pushesTo(e.command, gate.main, gate.current)) {
-        return {
-          deny: `ship: pushes to ${gate.main} wait for a red-team pass. Run the red-team skill on the changes about to be pushed, fix what it finds, then push again. Only if the user explicitly said to skip it, prefix the command with SHIP_SKIP_REDTEAM=1.`,
-        }
-      }
-    }
     const ran = await next(e)
-    if (isGit) $.clock.after(500, () => void refresh($))
+    if (/\bgit\b/.test(e.command)) $.clock.after(500, () => void refresh($))
     return ran
   })
 

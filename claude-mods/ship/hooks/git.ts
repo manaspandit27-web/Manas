@@ -13,8 +13,6 @@ export type ShipConfig = {
   rebuild: string[]
   /** "main": fast-forward main to this branch and push it; "branch": push only this branch */
   pushTo: 'main' | 'branch'
-  /** block the model's own pushes to main until /red-team ran this session */
-  redTeamGate: boolean
 }
 
 export function parseWorktrees(porcelain: string): Worktree[] {
@@ -47,25 +45,7 @@ export function parseConfig(text: string | undefined): ShipConfig | undefined {
     test: list(raw.test),
     rebuild: list(raw.rebuild),
     pushTo: raw.pushTo === 'branch' ? 'branch' : 'main',
-    redTeamGate: raw.redTeamGate !== false,
   }
-}
-
-/**
- * Whether a shell command pushes to `main`: an explicit `main` / `HEAD:main`
- * refspec, or a bare `git push` while `main` is checked out.
- */
-export function pushesTo(command: string, main: string, current: string | null): boolean {
-  const pushes = [...command.matchAll(/\bgit\b(?:\s+-C\s+\S+)?\s+push\b([^;&|\n]*)/g)]
-  return pushes.some(m => {
-    const args = (m[1] ?? '').split(/\s+/).filter(a => a !== '' && !a.startsWith('-'))
-    const specs = args.slice(1) // first is the remote
-    if (specs.length === 0) return current === main
-    return specs.some(s => {
-      const dest = s.replace(/^\+/, '').split(':').pop()
-      return dest === main || dest === `refs/heads/${main}` || (dest === 'HEAD' && current === main)
-    })
-  })
 }
 
 export function tail(text: string, lines = 12): string {
