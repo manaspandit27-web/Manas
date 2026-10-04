@@ -16,7 +16,7 @@
       "type": "number",
       "title": "Write a handoff after idle (minutes)",
       "description": "After this long with no new prompt, write a handoff if there were at least 2 turns since the last one (0 turns it off)",
-      "default": 15
+      "default": 31
     },
     "autoName": {
       "type": "boolean",

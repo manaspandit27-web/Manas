@@ -123,14 +123,14 @@ test('an unrelated first prompt gets nothing attached', async ($, on) => {
   expect('context' in r ? r.context : undefined).toBeUndefined()
 })
 
-test('after two turns and 15 idle minutes a handoff is written', async ($, on) => {
+test('after two turns and 31 idle minutes a handoff is written', async ($, on) => {
   const { clock, written } = world(on)
   const done = { answer: 'ok', durationMs: 1000, isAborted: false, reason: 'answer' } as const
   await $.turn.complete({ ...done, turnId: 't1' })
   await clock.advance(5 * 60_000)
   expect(Object.keys(written)).toHaveLength(0)
   await $.turn.complete({ ...done, turnId: 't2' })
-  await clock.advance(14 * 60_000)
+  await clock.advance(30 * 60_000)
   expect(Object.keys(written)).toHaveLength(0)
   await clock.advance(2 * 60_000)
   expect(Object.keys(written)).toHaveLength(1)

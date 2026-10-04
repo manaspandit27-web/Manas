@@ -7,11 +7,18 @@ Four mods for Claude Code. Each one is a plugin made of function hooks, built fo
 | `limits` | A status line showing your 5-hour and weekly limits with reset countdowns, toasts at 80% and 95%, and `/burn [12h] [model]`, which estimates whether a run of that length fits. At 95%, Claude is told to finish its current step, and a handoff is written. |
 | `ship` | A band above the prompt listing unpushed commits and uncommitted files in each worktree. `/ship` runs tests, fast-forwards main, pushes and rebuilds, then prints a one-line receipt. |
 | `codex` | `/codex-review` runs Codex's own review and shows it in a side pane, with **Send to Claude**, **Copy** and **Close** buttons. It also gives Claude an `mcp__codex__ask` tool for second opinions. |
-| `handoff` | Names untitled sessions. Writes handoff notes on its own: after 15 idle minutes, before compaction, on exit or `/clear`, and near a usage limit. When you return to a project, it offers the last note, and it attaches the matching note automatically if your first message continues earlier work. Commands: `/handoff`, `/handoffs [n]`. |
+| `handoff` | Names untitled sessions. Writes handoff notes on its own: after 31 idle minutes, before compaction, on exit or `/clear`, and near a usage limit. When you return to a project, it offers the last note, and it attaches the matching note automatically if your first message continues earlier work. Commands: `/handoff`, `/handoffs [n]`. |
 
 ## Install (local CLI and desktop app)
 
-Copy the four folders somewhere permanent, for example `~/claude-mods/`. Then list them in `~/.claude/settings.json`, separated by `:`:
+On the Mac, from a checkout of this branch:
+
+```sh
+git clone -b claude/claude-mods https://github.com/manaspandit27-web/Manas ~/claude-mods-src
+~/claude-mods-src/claude-mods/install.sh
+```
+
+The script copies the four mods to `~/claude-mods/`, backs up `~/.claude/settings.json`, and adds the mods to `CLAUDE_CODE_PLUGIN_DIRS` while keeping every other setting. You can re-run it to update. If you'd rather do it by hand, copy the folders and list them in `~/.claude/settings.json`, separated by `:`:
 
 ```json
 {

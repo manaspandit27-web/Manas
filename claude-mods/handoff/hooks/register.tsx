@@ -27,7 +27,7 @@ const pending = atom({ plugin: 'handoff', key: 'pending' } as const, '')
 const MAX_ENTRIES = 300
 
 let location: 'home' | 'project' = 'home'
-let idleMinutes = 15
+let idleMinutes = 31
 let autoName = true
 
 let title = ''
@@ -184,7 +184,7 @@ async function touch($: $) {
 
 export const register: Register = (on, options) => {
   location = options.location === 'project' ? 'project' : 'home'
-  idleMinutes = Number(options.idleMinutes ?? 15)
+  idleMinutes = Number(options.idleMinutes ?? 31)
   autoName = options.autoName !== false
 
   on('session.start', async ($, e, next) => {
