@@ -1,0 +1,7 @@
+{
+  "name": "ship",
+  "version": "0.1.0",
+  "description": "Unpushed-work band across worktrees, a /ship command for test → fast-forward main → push → rebuild, and a red-team gate on pushes to main",
+  "author": { "name": "manaspandit27" },
+  "types": "./types/index.d.ts"
+}

@@ -1,0 +1,28 @@
+{
+  "name": "handoff",
+  "version": "0.1.0",
+  "description": "Names sessions, writes handoff notes on its own (idle, compaction, exit, near a limit), and brings the right one back when you return to a project",
+  "author": { "name": "manaspandit27" },
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "location": {
+      "type": "string",
+      "title": "Where handoffs go",
+      "description": "home: ~/.claude/handoffs/<project>/ (keeps repos clean); project: <repo>/.claude/handoffs/",
+      "options": ["home", "project"],
+      "default": "home"
+    },
+    "idleMinutes": {
+      "type": "number",
+      "title": "Write a handoff after idle (minutes)",
+      "description": "After this long with no new prompt, write a handoff if there were at least 2 turns since the last one (0 turns it off)",
+      "default": 15
+    },
+    "autoName": {
+      "type": "boolean",
+      "title": "Name untitled sessions",
+      "description": "Give a session without a title a short one from what it is about",
+      "default": true
+    }
+  }
+}

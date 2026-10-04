@@ -1,0 +1,21 @@
+{
+  "name": "codex",
+  "version": "0.1.0",
+  "description": "Codex as a second reviewer: /codex-review in a side pane with Send to Claude, and an ask tool Claude can call for a second opinion",
+  "author": { "name": "manaspandit27" },
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "command": {
+      "type": "string",
+      "title": "Codex command",
+      "description": "The Codex CLI executable (a name on PATH or an absolute path)",
+      "default": "codex"
+    },
+    "model": {
+      "type": "string",
+      "title": "Codex model",
+      "description": "Model passed to codex with -m; empty uses Codex's own default",
+      "default": ""
+    }
+  }
+}

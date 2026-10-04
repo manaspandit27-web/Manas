@@ -1,0 +1,20 @@
+{
+  "name": "limits",
+  "version": "0.1.0",
+  "author": { "name": "manaspandit27" },
+  "description": "Rate-limit clock in the status line, threshold toasts, burn-rate history and a /burn planner for long runs",
+  "userConfig": {
+    "warnAt": {
+      "type": "number",
+      "title": "Warn at (%)",
+      "description": "Toast when a rate-limit window reaches this percent",
+      "default": 80
+    },
+    "wrapUpAt": {
+      "type": "number",
+      "title": "Wrap up at (%)",
+      "description": "At this percent, tell Claude to finish its current step and write a handoff (0 turns it off)",
+      "default": 95
+    }
+  }
+}
