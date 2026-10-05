@@ -22,6 +22,24 @@ St Mary's → Clev Cir (Green Line C)
 
 When a train has no stop count, it hasn't left its terminal yet. In that case only the MBTA's predicted time is shown.
 
+## 5-minute alerts
+
+When a train comes within 5 minutes of either stop, you get one alert for that train:
+
+- a toast inside Claude Code, e.g. `🚋 Wash Sq → Gov Ctr: train in 5 min (3 stops away)`
+- a macOS notification with a chime, so it reaches you even when you're in another app
+
+Each train alerts only once. A train that's already under 5 minutes when you start a session alerts right away.
+
+In `/config` you can:
+
+- change the 5 minutes with `alert_minutes`
+- turn off the macOS notification with `desktop_notify`, keeping only the toast
+
+If several Claude Code windows are open, each one alerts.
+
+The first macOS notification may ask for permission (it comes from "Script Editor"). Allow it in System Settings → Notifications.
+
 ## Setup on your laptop
 
 1. Clone this repo somewhere permanent, e.g. `~/code/manas`.
@@ -49,7 +67,7 @@ To change the refresh rate, set `refresh_seconds` in `/config` (minimum 15).
 
 ```sh
 ./greenline/greenline.py           # next trains at both stops
-./greenline/greenline.py --watch   # full-screen, refreshes every 30s
+./greenline/greenline.py --watch   # full-screen, refreshes every 30s, alerts at 5 min
 ./greenline/greenline.py --line    # the one-line version
 ```
 

@@ -44,7 +44,7 @@ const ROUTES: Record<string, unknown> = {
   },
 }
 
-type Seen = { keys: (string | undefined)[]; statuses: (string | undefined)[] }
+type Seen = { keys: (string | undefined)[]; statuses: (string | undefined)[]; toasts: string[]; notified: string[] }
 
 function fakeMbta(on: On, seen: Seen, status = 200) {
   on('session.start', ($, e) => ({ cwd: e.cwd }))
@@ -52,6 +52,14 @@ function fakeMbta(on: On, seen: Seen, status = 200) {
   on('ui.status', ($, e) => {
     seen.statuses.push(e.text)
     return { value: undefined }
+  })
+  on('ui.toast', ($, e) => {
+    seen.toasts.push(e.text)
+    return { value: undefined }
+  })
+  on('process.run', ($, e) => {
+    seen.notified.push(e.argv.join(' '))
+    return { value: { exitCode: 0, stdout: '', stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }
   })
   on('http.fetch', ($, e) => {
     const path = e.url.replace('https://api-v3.mbta.com', '')
@@ -73,7 +81,7 @@ const RUN = {
 
 test('status line shows both stops with stops-away', { options: { api_key: 'secret' } }, async ($, on) => {
   const clock = mock.clock(on, { now: NOW })
-  const seen: Seen = { keys: [], statuses: [] }
+  const seen: Seen = { keys: [], statuses: [], toasts: [], notified: [] }
   fakeMbta(on, seen)
 
   await $.session.start(START)
@@ -95,11 +103,49 @@ test('status line shows both stops with stops-away', { options: { api_key: 'secr
 test('falls back to MBTA_API_KEY and reports API errors', async ($, on) => {
   mock.clock(on, { now: NOW })
   mock.env(on, { MBTA_API_KEY: 'from-env' })
-  const seen: Seen = { keys: [], statuses: [] }
+  const seen: Seen = { keys: [], statuses: [], toasts: [], notified: [] }
   fakeMbta(on, seen, 403)
 
   await $.session.start(START)
   const out = await $.command.run(RUN)
   expect(out.text).toBe('Green Line: MBTA API 403 (check api_key)')
   expect(seen.keys[0]).toBe('from-env')
+})
+
+test('alerts once per train when it is 5 minutes out', async ($, on) => {
+  const clock = mock.clock(on, { now: NOW })
+  mock.env(on, {})
+  const seen: Seen = { keys: [], statuses: [], toasts: [], notified: [] }
+  fakeMbta(on, seen)
+
+  // at start: Washington Sq's 4-minute train and St. Mary's 2-minute train are already inside 5
+  await $.session.start(START)
+  await clock.settle()
+  expect(seen.toasts).toEqual([
+    '🚋 Wash Sq → Gov Ctr: train in 4 min (2 stops away)',
+    "🚋 St Mary's → Clev Cir: train in 2 min (1 stop away)",
+  ])
+  expect(seen.notified[0]).toBe(
+    'osascript -e display notification "Wash Sq → Gov Ctr: train in 4 min (2 stops away)" with title "Green Line" sound name "Glass"',
+  )
+
+  // the same trains don't alert again
+  await clock.advance(30_000)
+  expect(seen.toasts.length).toBe(2)
+
+  // six minutes in, the 11-minute train is 5 out: one new alert
+  await clock.advance(5 * 60_000 + 30_000)
+  expect(seen.toasts.slice(2)).toEqual(['🚋 Wash Sq → Gov Ctr: train in 5 min'])
+  expect(seen.notified.length).toBe(3)
+})
+
+test('desktop_notify off keeps alerts inside Claude Code', { options: { desktop_notify: false } }, async ($, on) => {
+  const clock = mock.clock(on, { now: NOW })
+  mock.env(on, {})
+  const seen: Seen = { keys: [], statuses: [], toasts: [], notified: [] }
+  fakeMbta(on, seen)
+  await $.session.start(START)
+  await clock.settle()
+  expect(seen.toasts.length).toBe(2)
+  expect(seen.notified).toEqual([])
 })

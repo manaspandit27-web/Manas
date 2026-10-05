@@ -19,6 +19,20 @@
       "description": "How often to ask the MBTA for new predictions.",
       "default": 30,
       "required": false
+    },
+    "alert_minutes": {
+      "type": "number",
+      "title": "Alert when a train is this many minutes away",
+      "description": "Each train alerts once, at Washington Square (to Government Center) and St. Mary's Street (to Cleveland Circle).",
+      "default": 5,
+      "required": false
+    },
+    "desktop_notify": {
+      "type": "boolean",
+      "title": "macOS notification too",
+      "description": "Also post a macOS notification with a sound, not just a toast in Claude Code.",
+      "default": true,
+      "required": false
     }
   }
 }

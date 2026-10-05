@@ -1,10 +1,14 @@
 import type { EngineInterface, Register } from 'claude-code'
 
-import { API, detail, loadBoards, loadLayout, statusLine } from './mbta'
+import { API, detail, dueAlerts, loadBoards, loadLayout, statusLine } from './mbta'
 import type { Board, Fetch, Layout } from './mbta'
 
 type State = {
   configuredKey: string
+  alertMinutes: number
+  desktopNotify: boolean
+  /** Prediction ids already announced, so each train alerts once. */
+  alerted: Set<string>
   layout?: Layout
   boards: Board[]
   error?: string
@@ -30,15 +34,37 @@ async function refresh($: EngineInterface, state: State): Promise<void> {
     state.boards = await loadBoards(fetch, state.layout, await $.clock.now())
     state.error = undefined
     $.ui.status(statusLine(state.boards))
+    for (const message of dueAlerts(state.boards, state.alertMinutes, state.alerted)) {
+      await announce($, state, message)
+    }
   } catch (err) {
     state.error = err instanceof Error ? err.message : String(err)
     $.ui.status(`🚋 Green Line: ${state.error}`)
   }
 }
 
+async function announce($: EngineInterface, state: State, message: string): Promise<void> {
+  $.ui.toast(`🚋 ${message}`, { timeoutMs: 20000 })
+  if (!state.desktopNotify) return
+  // macOS notification, so it reaches you outside the terminal; elsewhere this just fails quietly
+  const quoted = (text: string) => `"${text.replace(/["\\]/g, '')}"`
+  try {
+    await $.process.run([
+      'osascript',
+      '-e',
+      `display notification ${quoted(message)} with title "Green Line" sound name "Glass"`,
+    ])
+  } catch {
+    // no osascript here
+  }
+}
+
 export const register: Register = (on, options) => {
   const state: State = {
     configuredKey: typeof options.api_key === 'string' ? options.api_key.trim() : '',
+    alertMinutes: Number(options.alert_minutes) || 5,
+    desktopNotify: options.desktop_notify !== false,
+    alerted: new Set(),
     boards: [],
   }
   const refreshMs = Math.max(15, Number(options.refresh_seconds) || 30) * 1000

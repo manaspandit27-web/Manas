@@ -3,10 +3,11 @@
 St. Mary's Street (to Cleveland Circle). Standard library only.
 
     MBTA_API_KEY=... ./greenline.py          # print once
-    MBTA_API_KEY=... ./greenline.py --watch  # refresh every 30s
+    MBTA_API_KEY=... ./greenline.py --watch  # refresh every 30s, alert at 5 min
     ./greenline.py --line                    # one line, for a status bar
 """
 import json
+import subprocess
 import os
 import sys
 import time
@@ -17,6 +18,7 @@ from datetime import datetime, timezone
 
 API = "https://api-v3.mbta.com"
 ROUTE = "Green-C"
+ALERT_MINUTES = 5
 WATCHES = [
     # label, parent station, destination to match, fallback direction_id
     ("Wash Sq → Gov Ctr", "place-wascm", "Government Center", 1),
@@ -89,7 +91,7 @@ def boards(layout):
             minutes = round((datetime.fromisoformat(t) - now).total_seconds() / 60)
             if minutes < 0:
                 continue
-            arrival = {"minutes": minutes, "status": a.get("status")}
+            arrival = {"id": p["id"], "minutes": minutes, "status": a.get("status")}
             pos = where_now.get(rel(p, "vehicle"))
             if pos and pos[0] in line and target >= 0 and line.index(pos[0]) <= target:
                 arrival["stops"] = target - line.index(pos[0])
@@ -117,6 +119,34 @@ def one_line(bs):
     return "🚋 " + " · ".join(parts)
 
 
+def due_alerts(bs, alerted):
+    """Trains newly within ALERT_MINUTES of their stop; each train once."""
+    live, out = set(), []
+    for label, arrivals in bs:
+        for a in arrivals:
+            live.add(a["id"])
+            if a["minutes"] > ALERT_MINUTES or a["id"] in alerted:
+                continue
+            alerted.add(a["id"])
+            when = "now" if a["minutes"] == 0 else f"in {a['minutes']} min"
+            where = f" ({a['stops']} stop{'' if a['stops'] == 1 else 's'} away)" if "stops" in a else ""
+            out.append(f"{label}: train {when}{where}")
+    alerted &= live
+    return out
+
+
+def notify(message):
+    print("\a", end="", flush=True)
+    text = message.replace('"', "").replace("\\", "")
+    try:
+        subprocess.run(
+            ["osascript", "-e", f'display notification "{text}" with title "Green Line" sound name "Glass"'],
+            check=False, capture_output=True, timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError):
+        pass  # not a Mac
+
+
 def detail(bs):
     out = []
     for label, arrivals in bs:
@@ -140,8 +170,12 @@ def main():
     args = sys.argv[1:]
     layout = load_layout()
     if "--watch" in args:
+        alerted = set()
         while True:
-            print("\033[2J\033[H" + detail(boards(layout)) + f"\n\nupdated {time.strftime('%-I:%M:%S %p')}", flush=True)
+            bs = boards(layout)
+            print("\033[2J\033[H" + detail(bs) + f"\n\nupdated {time.strftime('%-I:%M:%S %p')}", flush=True)
+            for message in due_alerts(bs, alerted):
+                notify(message)
             time.sleep(30)
     bs = boards(layout)
     print(one_line(bs) if "--line" in args else detail(bs))

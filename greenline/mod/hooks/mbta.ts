@@ -21,6 +21,8 @@ export const WATCHES: readonly Watch[] = [
 ]
 
 export type Arrival = {
+  /** The MBTA's prediction id: one per train per stop, stable while it approaches. */
+  id: string
   minutes: number
   /** Stops between the train and the watched stop; undefined when the train isn't on the line yet. */
   stopsAway?: number
@@ -104,7 +106,7 @@ export function arrivalsOf(
     if (!time) continue
     const minutes = Math.round((Date.parse(time) - now) / 60000)
     if (minutes < 0) continue
-    const arrival: Arrival = { minutes }
+    const arrival: Arrival = { id: p.id, minutes }
     if (typeof p.attributes.status === 'string' && p.attributes.status) arrival.status = p.attributes.status
     const vehicle = rel(p, 'vehicle')
     const at = vehicle === undefined ? undefined : positions[vehicle]
@@ -150,6 +152,28 @@ export function statusLine(boards: Board[]): string {
     return `${watch.label} ${mins(first!)}${away(first!)}${second ? `, ${mins(second)}` : ''}`
   })
   return `🚋 ${parts.join(' · ')}`
+}
+
+/**
+ * Trains that have come within `withinMinutes` of their stop since the last
+ * check: one message per train, never repeated. `alerted` is the memory of
+ * which trains were announced; ids of trains no longer predicted are dropped.
+ */
+export function dueAlerts(boards: Board[], withinMinutes: number, alerted: Set<string>): string[] {
+  const live = new Set<string>()
+  const out: string[] = []
+  for (const { watch, arrivals } of boards) {
+    for (const a of arrivals) {
+      live.add(a.id)
+      if (a.minutes > withinMinutes || alerted.has(a.id)) continue
+      alerted.add(a.id)
+      const when = a.minutes === 0 ? 'now' : `in ${a.minutes} min`
+      const where = a.stopsAway === undefined ? '' : ` (${a.stopsAway} stop${a.stopsAway === 1 ? '' : 's'} away)`
+      out.push(`${watch.label}: train ${when}${where}`)
+    }
+  }
+  for (const id of alerted) if (!live.has(id)) alerted.delete(id)
+  return out
 }
 
 /** The /greenline answer: the next three trains per stop, with where each is. */
