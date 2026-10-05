@@ -1,0 +1,24 @@
+{
+  "name": "green-line",
+  "version": "0.1.0",
+  "description": "Next Green Line C trains at Washington Square (to Government Center) and St. Mary's Street (to Cleveland Circle), in the status line.",
+  "author": {
+    "name": "Manas Pandit"
+  },
+  "userConfig": {
+    "api_key": {
+      "type": "string",
+      "title": "MBTA API key",
+      "description": "Your api-v3.mbta.com key. Optional (the API works without one at a lower rate limit); MBTA_API_KEY in the environment works too.",
+      "sensitive": true,
+      "required": false
+    },
+    "refresh_seconds": {
+      "type": "number",
+      "title": "Refresh every (seconds)",
+      "description": "How often to ask the MBTA for new predictions.",
+      "default": 30,
+      "required": false
+    }
+  }
+}
