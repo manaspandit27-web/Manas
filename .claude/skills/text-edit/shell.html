@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Text editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #1C241F; --soft: #4A554E; --paper: #FFFDF6; --bg: #EDF0E8; --red: #C3352B; --mustard: #E9A820; --pine: #23604F; --line: #D7DCD2; --bar: 54px;
+    --display: 'Anton', 'Arial Narrow', sans-serif; --body: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif; --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--ink); font-family: var(--body); font-size: 14px; color: var(--ink); }
+  button, select, input, textarea { font: inherit; }
+  #bar { height: var(--bar); display: flex; align-items: center; gap: 10px; padding: 0 12px; background: var(--ink); color: var(--paper); border-bottom: 3px solid var(--mustard); white-space: nowrap; }
+  #bar .name { font-family: var(--display); font-size: 19px; letter-spacing: 0.04em; margin-right: 4px; }
+  #bar .name span { color: var(--mustard); }
+  .tb { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 0.05em; line-height: 16px; padding: 7px 11px; border: 1.5px solid var(--paper); background: transparent; color: var(--paper); cursor: pointer; }
+  .tb:hover:not(:disabled) { background: rgba(255,253,246,0.14); }
+  .tb:disabled { opacity: 0.45; cursor: default; }
+  .tb.on { background: var(--mustard); border-color: var(--mustard); color: var(--ink); }
+  .tb.go { background: var(--red); border-color: var(--red); }
+  .tb.go.clean { background: transparent; border-color: var(--paper); }
+  .lab { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: #C9CFC5; overflow: hidden; text-overflow: ellipsis; max-width: 30vw; }
+  .grow { flex: 1 1 0; min-width: 0; }
+  #hint { font-size: 12.5px; color: #C9CFC5; overflow: hidden; text-overflow: ellipsis; }
+  #hint b { color: var(--paper); }
+  #stage { position: absolute; top: var(--bar); left: 0; right: 0; bottom: 0; background: var(--bg); }
+  #frame { display: block; width: 100%; height: 100%; border: 0; background: var(--bg); }
+  #layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  #hover { position: absolute; display: none; border: 2px solid var(--mustard); background: rgba(233,168,32,0.10); pointer-events: none; }
+  #hoverTag { position: absolute; display: none; font-family: var(--mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; background: var(--mustard); color: var(--ink); padding: 1px 6px; pointer-events: none; white-space: nowrap; }
+  #editor { position: absolute; display: none; pointer-events: auto; background: var(--paper); border: 2px solid var(--ink); box-shadow: 6px 6px 0 rgba(28,36,31,0.35); padding: 8px; }
+  #editor textarea { display: block; width: 100%; min-height: 36px; resize: none; border: 1.5px solid var(--ink); background: #fff; color: var(--ink); padding: 6px 8px; outline: none; overflow: hidden; }
+  #editor textarea:focus { border-color: var(--pine); box-shadow: 0 0 0 2px rgba(35,96,79,0.25); }
+  #editor .was { font-size: 12.5px; color: var(--soft); margin: 6px 0 0; line-height: 1.4; max-height: 5.6em; overflow: auto; }
+  #editor .was b { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; color: var(--ink); }
+  #editor .row { display: flex; gap: 6px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+  #editor input { flex: 1 1 180px; min-width: 0; border: 1px solid var(--line); background: #fff; padding: 5px 7px; font-size: 12.5px; }
+  .eb { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.05em; padding: 5px 9px; border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; }
+  .eb.ok { background: var(--pine); border-color: var(--pine); color: var(--paper); }
+  .eb small { font-weight: 400; opacity: 0.75; }
+  #busy { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(237,240,232,0.86); pointer-events: auto; }
+  #busy div { font-family: var(--display); font-size: 26px; letter-spacing: 0.04em; background: var(--paper); border: 2px solid var(--ink); box-shadow: 6px 6px 0 rgba(28,36,31,0.3); padding: 16px 24px; max-width: 80%; text-align: center; white-space: normal; }
+  #drawer { position: absolute; top: var(--bar); right: 0; bottom: 0; width: min(520px, 100%); background: var(--paper); border-left: 3px solid var(--ink); display: none; flex-direction: column; box-shadow: -8px 0 0 rgba(28,36,31,0.15); }
+  #drawer header { padding: 12px 14px; border-bottom: 2px solid var(--ink); display: flex; gap: 10px; align-items: baseline; }
+  #drawer h2 { font-family: var(--display); font-weight: normal; font-size: 22px; letter-spacing: 0.03em; margin: 0; flex: 1; }
+  #drawer .body { overflow: auto; padding: 4px 14px 20px; flex: 1; }
+  .ed { border-bottom: 1px solid var(--line); padding: 10px 0; }
+  .ed .where { font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; color: var(--soft); display: flex; gap: 8px; }
+  .ed .where span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .ed .old { color: var(--soft); text-decoration: line-through; margin-top: 4px; overflow-wrap: anywhere; white-space: pre-wrap; }
+  .ed .new { margin-top: 2px; font-weight: 500; overflow-wrap: anywhere; white-space: pre-wrap; }
+  .ed .note { margin-top: 3px; color: var(--pine); font-style: italic; overflow-wrap: anywhere; }
+  .ed .un { color: var(--red); font-family: var(--mono); font-size: 10.5px; font-weight: 700; }
+  #toast { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); display: none; background: var(--ink); color: var(--paper); border: 2px solid var(--mustard); padding: 9px 16px; font-family: var(--mono); font-size: 12.5px; font-weight: 600; max-width: 80%; z-index: 5; }
+  #help { position: absolute; inset: var(--bar) 0 0 0; display: none; align-items: flex-start; justify-content: center; background: rgba(28,36,31,0.55); overflow: auto; z-index: 7; }
+  #help .card { background: var(--paper); border: 2px solid var(--ink); box-shadow: 8px 8px 0 rgba(28,36,31,0.4); margin: 32px 16px; padding: 20px 24px; max-width: 640px; font-size: 15px; line-height: 1.5; white-space: normal; }
+  #help h2 { font-family: var(--display); font-weight: normal; font-size: 26px; letter-spacing: 0.03em; margin: 0 0 8px; }
+  #help li { margin: 6px 0; }
+  kbd { font-family: var(--mono); font-size: 12px; border: 1px solid var(--ink); padding: 0 5px; background: #fff; }
+</style>
+</head>
+<body>
+<div id="bar">
+  <span class="name">TEXT <span>EDITOR</span></span>
+  <button class="tb on" id="mode" type="button" title="On: a click on any text opens it for rewriting. Off: the page works exactly as a visitor has it.">✎ EDITING: ON</button>
+  <span class="lab" id="where" title="The page in the frame. Use the site's own links and buttons to move around."></span>
+  <span class="grow" id="hint"><b>Click</b> text to rewrite it · <b>⌥ click</b> for a button’s words</span>
+  <button class="tb go clean" id="save" type="button">SAVED</button>
+  <button class="tb" id="list" type="button">ALL EDITS · 0</button>
+  <button class="tb" id="helpBtn" type="button" title="How this works">?</button>
+</div>
+<div id="stage">
+  <iframe id="frame" title="The site" src="about:blank"></iframe>
+  <div id="layer">
+    <div id="hover"></div><div id="hoverTag"></div>
+    <div id="editor">
+      <textarea id="edText" rows="1" spellcheck="true" aria-label="The words as they should be"></textarea>
+      <p class="was" id="edWas"></p>
+      <div class="row">
+        <input id="edNote" type="text" placeholder="A note for Claude about this spot (optional): “remove this box”, “say it once”…" aria-label="A note about this spot">
+      </div>
+      <div class="row">
+        <button class="eb ok" id="edDone" type="button">DONE <small>⏎</small></button>
+        <button class="eb" id="edCancel" type="button">CANCEL <small>esc</small></button>
+        <button class="eb" id="edReset" type="button">PUT THE ORIGINAL BACK</button>
+      </div>
+    </div>
+    <div id="busy"><div id="busyText"></div></div>
+  </div>
+</div>
+<aside id="drawer" aria-label="All edits">
+  <header><h2>ALL EDITS</h2><button class="eb" id="dlBtn" type="button">DOWNLOAD (.JSON)</button><button class="eb" id="closeDrawer" type="button">CLOSE</button></header>
+  <div class="body" id="drawerBody"></div>
+</aside>
+<div id="help"><div class="card">
+  <h2>HOW THIS WORKS</h2>
+  <p>This is the real site, exactly as it is served, inside a frame. Nothing you do here changes the site until Claude applies your edits.</p>
+  <ul>
+    <li><b>Click any text</b> to rewrite it. <kbd>⏎</kbd> keeps it, <kbd>esc</kbd> leaves it. The words change on the page at once, and wherever else those same words appear.</li>
+    <li><b>Buttons, links and boxes still work.</b> To rewrite the words on one, hold <kbd>⌥ option</kbd> and click it. The same for the grey hint inside an empty box.</li>
+    <li>Each rewrite can carry <b>a note for Claude</b> (“remove this whole box”, “say this only once”). A note on its own, with the words left alone, is kept too.</li>
+    <li><b>SAVE</b> writes everything to <code id="fileName">text-edits/edits.json</code>. Until you save, your rewrites are kept by this browser.</li>
+    <li><b>Move around the site</b> with its own links and buttons; your rewrites follow you to every page. <b>ALL EDITS</b> lists them, with UNDO.</li>
+    <li><b>EDITING: OFF</b> gives you the page exactly as a visitor has it.</li>
+  </ul>
+  <p>When you are done, SAVE and tell Claude <code>/text-edit apply</code>: each edit is found in the source and changed there. Then reload this page to see the site as it now reads.</p>
+  <p><button class="eb ok" id="helpClose" type="button">GOT IT</button></p>
+</div></div>
+<div id="toast" role="status"></div>
+<script src="/__edit/shell.js"></script>
+</body>
+</html>
