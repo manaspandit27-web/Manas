@@ -435,10 +435,12 @@ def _sweep_row(scn, res, method, examples="", data="", epochs="", train_minutes=
 
 
 def sweep(model, tok, scenario_keys, settings, n_test=100, out_csv="dry_run_results.csv", batch_size=16,
-          docs_batch_size=None):
+          docs_batch_size=None, docs_last=True):
     """Run baselines and fine-tuning settings for each scenario, appending one row per run to out_csv.
     Re-running skips anything already in the file, so a Colab disconnect loses at most one run.
-    docs_batch_size: a smaller test batch for prompt+docs, whose long prompts need more GPU memory."""
+    docs_batch_size: a smaller test batch for prompt+docs, whose long prompts need more GPU memory.
+    docs_last: run the prompt+docs baseline after the fine-tunes, since it is the slowest test and
+    the fine-tunes are what a cut-off session should not lose."""
     out = Path(out_csv)
     done = []
     if out.exists():
@@ -457,14 +459,17 @@ def sweep(model, tok, scenario_keys, settings, n_test=100, out_csv="dry_run_resu
 
     for key in scenario_keys:
         scn = load_scenario(key)
-        for method in ("prompt", "prompt+docs"):
+        def baseline(method):
             if (key, method, "", "", "") in seen:
-                continue
+                return
             print(f"\n=== {key}: {method}")
             with _base_model(model):
                 res = evaluate(model, tok, scn, method, n=n_test,
                                batch_size=(docs_batch_size or batch_size) if method == "prompt+docs" else batch_size)
             save(_sweep_row(scn, res, method))
+
+        for method in ("prompt",) if docs_last else ("prompt", "prompt+docs"):
+            baseline(method)
         for n, data, epochs in settings:
             if (key, "fine-tuned", str(n), data, str(epochs)) in seen:
                 continue
@@ -481,6 +486,8 @@ def sweep(model, tok, scenario_keys, settings, n_test=100, out_csv="dry_run_resu
                     torch.cuda.empty_cache()
             except ImportError:
                 pass
+        if docs_last:
+            baseline("prompt+docs")
     return model, done
 
 

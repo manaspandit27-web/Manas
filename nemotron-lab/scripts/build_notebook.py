@@ -386,7 +386,7 @@ Before we build the competition around `vc_screening` (Bramblewood Ventures), we
 | Free **T4** | 100, 200, 350, 700, 1,500 examples; 200 test pitches | about 6 to 8 hours, so more than one Colab session |
 | **A100 or L4** (Colab Pro) | Adds 3,000 and 6,300; 500 test pitches | not measured yet |
 
-The T4 time is extrapolated from the dry run (about 5 training minutes per 100 example-passes). Results are saved to Google Drive after every run. If Colab disconnects, reconnect and run all the cells again: it skips what is already done."""),
+The T4 time is extrapolated from the dry run (about 5 training minutes per 100 example-passes). Results are saved to Google Drive after every run. If Colab disconnects, reconnect and run all the cells again: it skips what is already done. The slow prompt + dealbook baseline runs last, so a cut-off session loses fine-tunes last."""),
 
     ("md", "## 1. Setup"),
     ("code", f"""# Downloads the lab materials and installs two libraries (~1 minute)
@@ -395,6 +395,8 @@ BRANCH = "{VC_BRANCH}"
 import os, sys
 if not os.path.exists("/content/lab-repo"):
     !git clone -q --depth 1 -b {{BRANCH}} {{REPO}} /content/lab-repo
+else:
+    !git -C /content/lab-repo pull -q
 os.chdir("/content/lab-repo/nemotron-lab")
 !pip install -q bitsandbytes peft
 sys.path.insert(0, os.getcwd())
