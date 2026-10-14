@@ -244,14 +244,31 @@ def generate(model, tok, conversations, max_new_tokens=120, batch_size=16, progr
     replies = [None] * len(prompts)
     tok.padding_side = "left"
     device = next(model.parameters()).device
-    for start in range(0, len(order), batch_size):
-        idx = order[start:start + batch_size]
-        enc = tok([prompts[i] for i in idx], return_tensors="pt", padding=True, add_special_tokens=False).to(device)
-        with torch.no_grad():
-            out = model.generate(**enc, max_new_tokens=max_new_tokens, do_sample=False,
-                                 pad_token_id=tok.pad_token_id, eos_token_id=_stop_ids(tok))
+    oom = getattr(torch.cuda, "OutOfMemoryError", RuntimeError)
+
+    def run(idx):
+        """Generate for one batch; if the GPU runs out of memory, split the batch in half and retry."""
+        try:
+            enc = tok([prompts[i] for i in idx], return_tensors="pt", padding=True,
+                      add_special_tokens=False).to(device)
+            with torch.no_grad():
+                out = model.generate(**enc, max_new_tokens=max_new_tokens, do_sample=False,
+                                     pad_token_id=tok.pad_token_id, eos_token_id=_stop_ids(tok))
+        except oom:
+            if len(idx) == 1:
+                raise
+            enc = out = None
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            half = len(idx) // 2
+            run(idx[:half])
+            run(idx[half:])
+            return
         for j, i in enumerate(idx):
             replies[i] = tok.decode(out[j, enc["input_ids"].shape[1]:], skip_special_tokens=True)
+
+    for start in range(0, len(order), batch_size):
+        run(order[start:start + batch_size])
         if progress:
             progress(min(start + batch_size, len(order)), len(order))
     return replies

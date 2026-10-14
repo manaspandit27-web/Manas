@@ -121,3 +121,22 @@ def test_small_samples_cover_every_rule(key):
                 available = sum(r[f] == v for r in scn.train)
                 got = sum(scn.train[i][f] == v for i in idx)
                 assert got >= min(floor, available), (f, v, n)
+
+
+def test_generate_splits_a_batch_that_runs_out_of_gpu_memory(monkeypatch):
+    import torch
+    scn, model, tok = _tiny_model_and_tokenizer()
+    convs = [core.build_messages(scn, r["input"]) for r in scn.test[:5]]
+    expected = core.generate(model, tok, convs, max_new_tokens=4, batch_size=1)
+    oom = getattr(torch.cuda, "OutOfMemoryError", RuntimeError)
+    real, sizes = model.generate, []
+
+    def small_batches_only(**kw):
+        sizes.append(kw["input_ids"].shape[0])
+        if kw["input_ids"].shape[0] > 1:
+            raise oom("CUDA out of memory (simulated)")
+        return real(**kw)
+
+    monkeypatch.setattr(model, "generate", small_batches_only)
+    assert core.generate(model, tok, convs, max_new_tokens=4, batch_size=4) == expected
+    assert sizes[0] == 4 and sizes.count(1) == 5

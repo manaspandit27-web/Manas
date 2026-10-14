@@ -393,6 +393,7 @@ The T4 time is extrapolated from the dry run (about 5 training minutes per 100 e
 REPO = "{REPO}"
 BRANCH = "{VC_BRANCH}"
 import os, sys
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"  # less memory lost to fragmentation
 if not os.path.exists("/content/lab-repo"):
     !git clone -q --depth 1 -b {{BRANCH}} {{REPO}} /content/lab-repo
 else:
@@ -425,7 +426,8 @@ print("Results file:", OUT)"""),
 model, tok = core.load_model()"""),
 
     ("md", "## 2. Run everything (leave the tab open)"),
-    ("code", """model, rows = core.sweep(model, tok, ["vc_screening"], PLAN, n_test=N_TEST, out_csv=OUT, docs_batch_size=4)"""),
+    ("code", """# The prompt+docs baseline runs last. Its prompts are long; if a batch runs out of GPU memory, the lab splits it.
+model, rows = core.sweep(model, tok, ["vc_screening"], PLAN, n_test=N_TEST, out_csv=OUT, docs_batch_size=2)"""),
 
     ("md", """## 3. Results
 
