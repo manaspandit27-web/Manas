@@ -11,7 +11,11 @@ Usage:  python scripts/generate_data.py          # rewrites scenarios/*/*.csv
 
 import csv
 import random
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import vc_pitches  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent / "scenarios"
 N_TRAIN, N_TEST = 600, 100
@@ -508,6 +512,13 @@ def leads(r):
     return text, {"segment": segment, "intent": intent, "route": route}
 
 
+# -------------------------------------------------------------- vc pitches ---
+
+def vc_screening(r):
+    text, labels, _ = vc_pitches.generate(r)
+    return text, labels
+
+
 # ------------------------------------------------------------------ driver ---
 
 GENERATORS = {
@@ -516,25 +527,32 @@ GENERATORS = {
     "claims_triage": claims,
     "expense_audit": expenses,
     "lead_qualification": leads,
+    "vc_screening": vc_screening,
 }
+# The competition scenario needs a large pool (18 teams x 350 labels, plus spare) and a test set big
+# enough to separate teams a few points apart.
+SIZES = {"vc_screening": (7000, 500)}
+PREFIX = {"vc_screening": "vcs"}
 # Free-text fields are never corrupted in the noisy file.
 NOISY_SKIP = {"vendor", "invoice_number", "amount_usd"}
 
 
 def build(name, gen, seed):
     r = random.Random(seed)
+    n_train, n_test = SIZES.get(name, (N_TRAIN, N_TEST))
+    prefix = PREFIX.get(name, name[:3])
     seen, rows = set(), []
-    while len(rows) < N_TRAIN + N_TEST:
+    while len(rows) < n_train + n_test:
         text, out = gen(r)
         if text in seen:
             continue
         seen.add(text)
         rows.append({"input": text, **out})
-    train, test = rows[:N_TRAIN], rows[N_TRAIN:]
+    train, test = rows[:n_train], rows[n_train:]
     for i, row in enumerate(train):
-        row["id"] = f"{name[:3]}-tr-{i:04d}"
+        row["id"] = f"{prefix}-tr-{i:04d}"
     for i, row in enumerate(test):
-        row["id"] = f"{name[:3]}-te-{i:04d}"
+        row["id"] = f"{prefix}-te-{i:04d}"
 
     fields = [k for k in train[0] if k not in ("id", "input")]
     values = {f: sorted({row[f] for row in rows}) for f in fields}

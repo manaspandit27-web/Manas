@@ -216,7 +216,7 @@ display(pd.DataFrame(core.list_scenarios()))"""),
 
     ("code", """# Options
 MODE = "quick"          # "quick" or "full"
-SCENARIOS = [s["scenario"] for s in core.list_scenarios()]   # or e.g. ["invoice_intake", "expense_audit"]
+SCENARIOS = [s["scenario"] for s in core.list_scenarios() if s["scenario"] != "vc_screening"]   # or e.g. ["invoice_intake"]
 SAVE_TO_DRIVE = True    # keeps results if the Colab session ends (asks for Google Drive permission)
 
 OUT = "dry_run_results.csv"

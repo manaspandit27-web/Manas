@@ -14,18 +14,22 @@ from lab import core  # noqa: E402
 SCENARIOS = [s["scenario"] for s in core.list_scenarios()]
 
 
-def test_five_scenarios():
-    assert len(SCENARIOS) == 5
+SIZES = {"vc_screening": (7000, 500)}  # the competition scenario; the others are 600 train, 100 test
+
+
+def test_six_scenarios():
+    assert len(SCENARIOS) == 6
 
 
 @pytest.mark.parametrize("key", SCENARIOS)
 def test_scenario_data(key):
     scn = core.load_scenario(key)
-    assert len(scn.train) == len(scn.train_noisy) == 600 and len(scn.test) == 100
+    n_train, n_test = SIZES.get(key, (600, 100))
+    assert len(scn.train) == len(scn.train_noisy) == n_train and len(scn.test) == n_test
     assert not {r["input"] for r in scn.train} & {r["input"] for r in scn.test}
     assert all(r["input"].strip() for r in scn.train + scn.test)
     changed = sum(a != b for a, b in zip(scn.train, scn.train_noisy))
-    assert 0.2 < changed / 600 < 0.4
+    assert 0.2 < changed / n_train < 0.4
     assert scn.policy and scn.case
     # every fixed-choice field shows its options in the prompt
     prompt = core.system_prompt(scn)

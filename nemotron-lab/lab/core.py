@@ -33,6 +33,8 @@ SAMPLE_TESTS = {
                      "for the table. Receipt attached.",
     "lead_qualification": "Hi, I'm the CFO of a 2,500-person hospital network in Sydney. We're already a Lumen "
                           "customer in the US and want pricing for our Australian team.",
+    "vc_screening": "We're raising a $2.5M seed in Chicago. We build accounts-payable software for restaurant groups; "
+                    "I was a restaurant CFO for 12 years. $80k ARR. Pennywhistle's founder introduced us.",
 }
 
 

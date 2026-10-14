@@ -44,6 +44,8 @@ This is just a demo to get the ball rolling! The session follows the idea in Bri
 | `expense_audit` | Meridian Advisory | Finance / compliance | expense type, decision, reason code |
 | `lead_qualification` | Lumen Analytics | Marketing / sales | segment, intent, sales routing |
 
+A sixth scenario, `vc_screening` (Bramblewood Ventures, a fictional seed fund), is a **draft for a competition version** of the session: teams on a budget build the best pitch-screening model, then choose whether to pool their labels. Its dealbook is much longer, the data has a long tail of rare rules (7,000 training pitches, 500 test), and it is not part of the instructor dry run. See [`scenarios/vc_screening/NOTES.md`](scenarios/vc_screening/NOTES.md).
+
 All companies, people and data are synthetic. Labels come from applying each `policy.md` to the facts in each message, so they are always consistent with the policy.
 
 ## Running it

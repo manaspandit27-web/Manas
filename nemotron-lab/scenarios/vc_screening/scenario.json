@@ -1,0 +1,10 @@
+{
+  "title": "Bramblewood Ventures - Pitch Screening",
+  "company": "Bramblewood Ventures",
+  "function": "Venture capital / Investment screening",
+  "task": "Read an inbound startup pitch and screen it with the fund's dealbook: pass, take a first meeting, or fast-track it to a partner, with the dealbook's reason code.",
+  "fields": {
+    "decision": "pass, meeting (first call with an associate) or fast_track (partner meeting this week)",
+    "reason": "the dealbook reason code for the decision"
+  }
+}
