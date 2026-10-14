@@ -434,9 +434,11 @@ def _sweep_row(scn, res, method, examples="", data="", epochs="", train_minutes=
                                      ("valid JSON %", "all fields correct %")})}
 
 
-def sweep(model, tok, scenario_keys, settings, n_test=100, out_csv="dry_run_results.csv"):
+def sweep(model, tok, scenario_keys, settings, n_test=100, out_csv="dry_run_results.csv", batch_size=16,
+          docs_batch_size=None):
     """Run baselines and fine-tuning settings for each scenario, appending one row per run to out_csv.
-    Re-running skips anything already in the file, so a Colab disconnect loses at most one run."""
+    Re-running skips anything already in the file, so a Colab disconnect loses at most one run.
+    docs_batch_size: a smaller test batch for prompt+docs, whose long prompts need more GPU memory."""
     out = Path(out_csv)
     done = []
     if out.exists():
@@ -460,7 +462,8 @@ def sweep(model, tok, scenario_keys, settings, n_test=100, out_csv="dry_run_resu
                 continue
             print(f"\n=== {key}: {method}")
             with _base_model(model):
-                res = evaluate(model, tok, scn, method, n=n_test)
+                res = evaluate(model, tok, scn, method, n=n_test,
+                               batch_size=(docs_batch_size or batch_size) if method == "prompt+docs" else batch_size)
             save(_sweep_row(scn, res, method))
         for n, data, epochs in settings:
             if (key, "fine-tuned", str(n), data, str(epochs)) in seen:
@@ -469,7 +472,7 @@ def sweep(model, tok, scenario_keys, settings, n_test=100, out_csv="dry_run_resu
             t0 = time.time()
             model, losses = train(model, tok, scn, n_examples=n, data=data, epochs=epochs)
             minutes = round((time.time() - t0) / 60, 1)
-            res = evaluate(model, tok, scn, "fine-tuned", n=n_test)
+            res = evaluate(model, tok, scn, "fine-tuned", n=n_test, batch_size=batch_size)
             tail = losses[-5:]
             save(_sweep_row(scn, res, "fine-tuned", n, data, epochs, minutes, round(sum(tail) / len(tail), 4)))
             try:
@@ -531,7 +534,8 @@ def sweep_report(csv_path="dry_run_results.csv", plot=True):
             ax.set_title(key, fontsize=10)
             ax.set_xscale("log")
             ax.minorticks_off()
-            ax.set_xticks([25, 50, 100, 200, 300], ["25", "50", "100", "200", "300"])
+            ticks = sorted(pd.to_numeric(g[g.method == "fine-tuned"].examples).astype(int).unique()) or [100]
+            ax.set_xticks(ticks, [f"{t:,}" for t in ticks])
             ax.set_xlabel("training examples")
             ax.set_ylim(0, 105)
             ax.spines[["top", "right"]].set_visible(False)

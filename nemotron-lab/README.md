@@ -30,6 +30,7 @@ This is just a demo to get the ball rolling! The session follows the idea in Bri
 | `scenarios/<name>/` | Both | `examples_to_label.csv` (100 messages for students to label), `case.md` (1-page case), `policy.md` (the expert rules), `train.csv` (600 expert-labeled), `train_noisy.csv` (same, 30% mislabeled), `test.csv` (100 held out) |
 | `lab/demo.py`, `lab/demo_ui.html` | Under the hood | The projector chat: a small web server and its page |
 | `lab/core.py` | Under the hood | Loading, prompting, LoRA training and scoring, kept out of the notebook so cells stay short |
+| [`notebooks/vc_learning_curve.ipynb`](notebooks/vc_learning_curve.ipynb) | Maintainers, before the competition | Fine-tunes Nemotron on 100 to 6,300 pitches of the draft `vc_screening` scenario and plots its learning curve against both baselines. Resumes after a Colab disconnect |
 | [`notebooks/finetune_lab.ipynb`](notebooks/finetune_lab.ipynb) | Not used in the session | An earlier version in which every student runs the fine-tuning themselves in Colab. Kept for reference |
 | `scripts/` | Maintainers | `generate_data.py` rebuilds the datasets; `build_notebook.py` rebuilds both notebooks |
 | `tests/` | Maintainers | Data checks and a CPU smoke test of the full train → evaluate loop on a tiny stand-in model |

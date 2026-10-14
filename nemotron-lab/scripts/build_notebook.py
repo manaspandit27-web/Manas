@@ -1,4 +1,4 @@
-"""Builds notebooks/finetune_lab.ipynb, notebooks/instructor_dry_run.ipynb and notebooks/projector_demo.ipynb from the
+"""Builds notebooks/finetune_lab.ipynb, instructor_dry_run.ipynb, projector_demo.ipynb and vc_learning_curve.ipynb from the
 cells below (edit here, then re-run).
 
 Usage:  python scripts/build_notebook.py
@@ -370,6 +370,70 @@ After this cell, go back to the chat and press *Ask the same questions again*.""
 ]
 
 
+VC_BRANCH = "claude/exciting-babbage-6ha0jr"  # where vc_screening lives until it is merged into BRANCH
+
+VC_CELLS = [
+    ("md", """# VC pitch screening: does fine-tuning keep improving up to class volume?
+
+Before we build the competition around `vc_screening` (Bramblewood Ventures), we need its real learning curve. This notebook fine-tunes Nemotron on **100 to 6,300** screened pitches and scores each model on the same held-out pitches. It also scores the two baselines: the prompt alone, and the prompt with the whole dealbook pasted in.
+
+**What we hope to see:** clear gains from 100 to 500 examples, still rising at 3,000 to 6,300, and not yet at 100%. The cheap stand-in check (`scenarios/vc_screening/NOTES.md`) suggests this, but only Nemotron can confirm it.
+
+**Which GPU:**
+
+| Runtime | Plan the notebook picks | Rough time |
+|---|---|---|
+| Free **T4** | 100, 200, 350, 700, 1,500 examples; 200 test pitches | about 6 to 8 hours, so more than one Colab session |
+| **A100 or L4** (Colab Pro) | Adds 3,000 and 6,300; 500 test pitches | not measured yet |
+
+The T4 time is extrapolated from the dry run (about 5 training minutes per 100 example-passes). Results are saved to Google Drive after every run. If Colab disconnects, reconnect and run all the cells again: it skips what is already done."""),
+
+    ("md", "## 1. Setup"),
+    ("code", f"""# Downloads the lab materials and installs two libraries (~1 minute)
+REPO = "{REPO}"
+BRANCH = "{VC_BRANCH}"
+import os, sys
+if not os.path.exists("/content/lab-repo"):
+    !git clone -q --depth 1 -b {{BRANCH}} {{REPO}} /content/lab-repo
+os.chdir("/content/lab-repo/nemotron-lab")
+!pip install -q bitsandbytes peft
+sys.path.insert(0, os.getcwd())
+from lab import core
+import torch
+GPU = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "none"
+print("GPU:", GPU)"""),
+
+    ("code", """# The plan. Edit SIZES or N_TEST to change it.
+BIG_GPU = GPU != "none" and "T4" not in GPU
+SIZES = [100, 200, 350, 700, 1500] + ([3000, 6300] if BIG_GPU else [])
+EPOCHS = 2
+N_TEST = 500 if BIG_GPU else 200
+PLAN = [(n, "clean", EPOCHS) for n in SIZES]
+
+passes = sum(n * EPOCHS for n in SIZES)
+print(f"Plan: {SIZES} examples x {EPOCHS} epochs, {N_TEST} test pitches")
+print(f"Training: {passes:,} example-passes" + (f", about {passes / 100 * 5 / 60:.1f} hours on a T4" if not BIG_GPU else ""))
+
+from google.colab import drive
+drive.mount("/content/drive")
+OUT = "/content/drive/MyDrive/nemotron_vc_curve_results.csv"
+print("Results file:", OUT)"""),
+
+    ("code", """# Loads NVIDIA Nemotron onto the GPU (~3 minutes)
+model, tok = core.load_model()"""),
+
+    ("md", "## 2. Run everything (leave the tab open)"),
+    ("code", """model, rows = core.sweep(model, tok, ["vc_screening"], PLAN, n_test=N_TEST, out_csv=OUT, docs_batch_size=4)"""),
+
+    ("md", """## 3. Results
+
+The chart shows the fine-tuned models' accuracy (both fields right) with 95% ranges, against the two baselines as dashed lines. Send the results file back (or copy it into `scenarios/vc_screening/`) so we can set the generator and draw the competition's frontier."""),
+    ("code", """table, recs = core.sweep_report(OUT)
+display(recs)
+display(table)"""),
+]
+
+
 def write(cells, out):
     nb_cells = []
     for kind, src in cells:
@@ -392,6 +456,7 @@ def main():
     write(CELLS, OUT)
     write(DRY_RUN_CELLS, OUT.parent / "instructor_dry_run.ipynb")
     write(DEMO_CELLS, OUT.parent / "projector_demo.ipynb")
+    write(VC_CELLS, OUT.parent / "vc_learning_curve.ipynb")
 
 
 if __name__ == "__main__":
