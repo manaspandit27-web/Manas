@@ -1,0 +1,6 @@
+id,deliverable,owner,due_date,status,last_update,notes,depends_on
+D1,EXAMPLE Week 5 lecture slides,karim,2026-10-24,in_progress,2026-10-10,,
+D2,EXAMPLE Problem set 3 + solutions,rem,2026-10-20,in_progress,2026-10-19,2026-10-19: Rem's assistant says draft is with Rem for review,
+D3,EXAMPLE Guest speaker confirmed,mitch,2026-11-05,not_started,,,
+D4,EXAMPLE Midterm project rubric,iav,2026-11-12,in_progress,2026-10-21,,D2
+D5,EXAMPLE Room booking for final presentations,manas,2026-10-25,not_started,,,

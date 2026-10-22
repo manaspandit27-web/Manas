@@ -1,0 +1,24 @@
+# Non-secret settings. Secrets (API keys, passwords) go in environment variables;
+# see README.md.
+
+[course]
+name = "DSAIL"
+timezone = "America/New_York"   # used for "today", due dates and the schedule
+coordinator = "manas"           # People-tab key of the person who gets the daily digest
+
+[agent]
+model = "claude-opus-5-5"
+effort = "medium"               # low | medium | high; raise if its judgement looks thin
+
+[reminders]
+# While true, every message to someone other than the coordinator is queued in the
+# Messages tab with status "pending". Change it to "approved" and the next run sends it.
+require_approval = true
+min_days_between = 3            # don't remind the same person about the same deliverable more often than this
+due_soon_days = 3               # "due soon" = due within this many days
+stale_after_days = 7            # "stalled" = in progress with no update for this many days
+cc_coordinator = true           # cc the coordinator on reminder emails to other people
+
+[store]
+backend = "sheet"               # "sheet" (Google Sheets, needs SHEET_ID) or "local" (CSV files)
+local_dir = "sample_data"

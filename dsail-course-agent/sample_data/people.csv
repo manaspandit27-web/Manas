@@ -1,0 +1,10 @@
+key,name,role,email,slack_email,contact_via,channels
+manas,Manas,coordinator,manas@example.edu,,manas,"email,slack"
+karim,Karim,prof,karim@example.edu,,karim_fss,email
+rem,Rem,prof,rem@example.edu,,rem_fss,email
+iav,IAV,prof,iav@example.edu,,iav_fss,email
+mitch,Mitch,prof,mitch@example.edu,,mitch_fss,email
+karim_fss,Karim's FSS assistant,assistant,karim.fss@example.edu,,karim_fss,"email,slack"
+rem_fss,Rem's FSS assistant,assistant,rem.fss@example.edu,,rem_fss,"email,slack"
+iav_fss,IAV's FSS assistant,assistant,iav.fss@example.edu,,iav_fss,"email,slack"
+mitch_fss,Mitch's FSS assistant,assistant,mitch.fss@example.edu,,mitch_fss,"email,slack"
