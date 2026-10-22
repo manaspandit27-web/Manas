@@ -2,9 +2,9 @@ name: Course agent
 
 on:
   schedule:
-    # Weekdays at 12:47 UTC = 8:47am New York time during daylight saving (7:47am in winter).
-    # GitHub cron is always UTC; adjust to your time zone.
-    - cron: "47 12 * * 1-5"
+    # Weekdays at 13:47 UTC = 8:47am EST (9:47am once daylight saving starts in March).
+    # GitHub cron is always UTC and ignores daylight saving.
+    - cron: "47 13 * * 1-5"
   workflow_dispatch:
     inputs:
       dry_run:

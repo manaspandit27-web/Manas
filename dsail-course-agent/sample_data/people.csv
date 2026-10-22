@@ -1,5 +1,5 @@
 key,name,role,email,slack_email,contact_via,channels
-manas,Manas,coordinator,manas@example.edu,,manas,"email,slack"
+manas,Manas,coordinator,mpandit@hbs.edu,,manas,"email,slack"
 karim,Karim,prof,karim@example.edu,,karim_fss,email
 rem,Rem,prof,rem@example.edu,,rem_fss,email
 iav,IAV,prof,iav@example.edu,,iav_fss,email
